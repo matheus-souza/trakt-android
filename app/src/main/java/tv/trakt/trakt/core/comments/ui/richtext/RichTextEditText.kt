@@ -149,8 +149,7 @@ internal class RichTextEditText(
 
     fun toggleInline(style: RichInlineStyle) {
         val editable = text ?: return
-        val start = selectionStart.coerceAtLeast(0)
-        val end = selectionEnd.coerceAtLeast(0)
+        val (start, end) = orderedSelection()
 
         if (start == end) {
             pendingStyle = typingStyleAt(editable, start).toggle(style)
@@ -172,9 +171,8 @@ internal class RichTextEditText(
 
     fun toggleBlock(type: RichBlockType) {
         val editable = text ?: return
-        val firstLine = editable.lineOf(selectionStart.coerceAtLeast(0))
-        val lastLine = editable.lineOf(selectionEnd.coerceAtLeast(0))
-        val lines = firstLine..lastLine
+        val (start, end) = orderedSelection()
+        val lines = editable.lineOf(start)..editable.lineOf(end)
         val target = if (lines.all { blockTypes.getOrNull(it) == type }) Paragraph else type
 
         blockTypes = blockTypes.mapIndexed { index, current -> if (index in lines) target else current }
@@ -189,8 +187,7 @@ internal class RichTextEditText(
         range: IntRange? = null,
     ) {
         val editable = text ?: return
-        val start = range?.first ?: selectionStart.coerceAtLeast(0)
-        val end = range?.let { it.last + 1 } ?: selectionEnd.coerceAtLeast(0)
+        val (start, end) = range?.let { it.first to it.last + 1 } ?: orderedSelection()
         val inserted = "${mention.name} "
 
         pendingStyle = RichStyle()
@@ -522,9 +519,14 @@ internal class RichTextEditText(
         )
     }
 
+    private fun orderedSelection(): Pair<Int, Int> {
+        val anchor = selectionStart.coerceAtLeast(0)
+        val focus = selectionEnd.coerceAtLeast(0)
+        return minOf(anchor, focus) to maxOf(anchor, focus)
+    }
+
     private fun toolbarState(editable: Spanned): RichToolbarState {
-        val start = selectionStart.coerceAtLeast(0)
-        val end = selectionEnd.coerceAtLeast(0)
+        val (start, end) = orderedSelection()
         val lines = editable.lineOf(start)..editable.lineOf(end)
         val blocks = lines.map { blockTypes.getOrElse(it) { Paragraph } }
 
