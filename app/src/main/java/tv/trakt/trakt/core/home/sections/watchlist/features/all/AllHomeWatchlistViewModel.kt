@@ -11,6 +11,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
@@ -178,36 +179,38 @@ internal class AllHomeWatchlistViewModel(
                     }
                 }
 
-                val showsAsync = async {
-                    getShowsUseCase.getWatchlist(
-                        limit = HOME_ALL_WATCHLIST_LIMIT,
-                        filters = filterState.value,
-                        skipLocal = true,
-                    )
-                }
-                val moviesAsync = async {
-                    getMoviesUseCase.getWatchlist(
-                        limit = HOME_ALL_WATCHLIST_LIMIT,
-                        filters = filterState.value,
-                        skipLocal = true,
-                    )
-                }
-
-                itemsState.update {
-                    (showsAsync.await() + moviesAsync.await())
-                        .filter {
-                            when (filterState.value.mode) {
-                                MediaMode.Shows -> it is ShowItem
-                                MediaMode.Movies -> it is MovieItem
-                                else -> true
-                            }
-                        }
-                        .sortedWith(
-                            compareByDescending<WatchlistItem> { it.released }
-                                .thenByDescending { it.listedAt },
+                coroutineScope {
+                    val showsAsync = async {
+                        getShowsUseCase.getWatchlist(
+                            limit = HOME_ALL_WATCHLIST_LIMIT,
+                            filters = filterState.value,
+                            skipLocal = true,
                         )
-                        .distinctBy { it.key }
-                        .toImmutableList()
+                    }
+                    val moviesAsync = async {
+                        getMoviesUseCase.getWatchlist(
+                            limit = HOME_ALL_WATCHLIST_LIMIT,
+                            filters = filterState.value,
+                            skipLocal = true,
+                        )
+                    }
+
+                    itemsState.update {
+                        (showsAsync.await() + moviesAsync.await())
+                            .filter {
+                                when (filterState.value.mode) {
+                                    MediaMode.Shows -> it is ShowItem
+                                    MediaMode.Movies -> it is MovieItem
+                                    else -> true
+                                }
+                            }
+                            .sortedWith(
+                                compareByDescending<WatchlistItem> { it.released }
+                                    .thenByDescending { it.listedAt },
+                            )
+                            .distinctBy { it.key }
+                            .toImmutableList()
+                    }
                 }
             } catch (error: Exception) {
                 error.rethrowCancellation {
@@ -231,36 +234,38 @@ internal class AllHomeWatchlistViewModel(
             try {
                 loadingState.update { Loading }
 
-                val showsAsync = async {
-                    getShowsUseCase.getWatchlist(
-                        limit = HOME_ALL_WATCHLIST_LIMIT,
-                        filters = filterState.value,
-                        skipLocal = true,
-                    )
-                }
-                val moviesAsync = async {
-                    getMoviesUseCase.getWatchlist(
-                        limit = HOME_ALL_WATCHLIST_LIMIT,
-                        filters = filterState.value,
-                        skipLocal = true,
-                    )
-                }
-
-                itemsState.update {
-                    (showsAsync.await() + moviesAsync.await())
-                        .filter {
-                            when (filterState.value.mode) {
-                                MediaMode.Shows -> it is ShowItem
-                                MediaMode.Movies -> it is MovieItem
-                                else -> true
-                            }
-                        }
-                        .sortedWith(
-                            compareByDescending<WatchlistItem> { it.released }
-                                .thenByDescending { it.listedAt },
+                coroutineScope {
+                    val showsAsync = async {
+                        getShowsUseCase.getWatchlist(
+                            limit = HOME_ALL_WATCHLIST_LIMIT,
+                            filters = filterState.value,
+                            skipLocal = true,
                         )
-                        .distinctBy { it.key }
-                        .toImmutableList()
+                    }
+                    val moviesAsync = async {
+                        getMoviesUseCase.getWatchlist(
+                            limit = HOME_ALL_WATCHLIST_LIMIT,
+                            filters = filterState.value,
+                            skipLocal = true,
+                        )
+                    }
+
+                    itemsState.update {
+                        (showsAsync.await() + moviesAsync.await())
+                            .filter {
+                                when (filterState.value.mode) {
+                                    MediaMode.Shows -> it is ShowItem
+                                    MediaMode.Movies -> it is MovieItem
+                                    else -> true
+                                }
+                            }
+                            .sortedWith(
+                                compareByDescending<WatchlistItem> { it.released }
+                                    .thenByDescending { it.listedAt },
+                            )
+                            .distinctBy { it.key }
+                            .toImmutableList()
+                    }
                 }
             } catch (error: Exception) {
                 error.rethrowCancellation {
