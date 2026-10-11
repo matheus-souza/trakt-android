@@ -7,6 +7,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -67,12 +68,14 @@ internal class MediaReactionsViewModel(
                 loadingState.update { Loading }
 
                 val user = sessionManager.getProfile()
-                val summaryAsync = async { getSummaryUseCase.getSummary(target) }
-                val userReactionsAsync = async { loadUserReactions(user) }
+                coroutineScope {
+                    val summaryAsync = async { getSummaryUseCase.getSummary(target) }
+                    val userReactionsAsync = async { loadUserReactions(user) }
 
-                userState.update { user }
-                summaryState.update { summaryAsync.await() }
-                userReactionsState.update { userReactionsAsync.await() }
+                    userState.update { user }
+                    summaryState.update { summaryAsync.await() }
+                    userReactionsState.update { userReactionsAsync.await() }
+                }
             } catch (error: Exception) {
                 error.rethrowCancellation {
                     errorState.update { error }
