@@ -34,10 +34,12 @@ internal fun EpisodeUpcomingItemView(
     midReleases: Boolean = false,
     onClick: () -> Unit,
     onShowClick: () -> Unit,
+    onLongClick: (() -> Unit)? = null,
 ) {
     HorizontalMediaCard(
         title = "",
-        more = false,
+        more = onLongClick != null,
+        onLongClick = onLongClick,
         onClick = onClick,
         containerImageUrl =
             item.show.images?.getFanartUrl()

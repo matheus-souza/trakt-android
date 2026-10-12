@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package tv.trakt.trakt.core.home.sections.upcoming
 
 import androidx.compose.animation.Crossfade
@@ -16,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,10 +51,12 @@ import tv.trakt.trakt.common.model.MediaMode
 import tv.trakt.trakt.common.model.Movie
 import tv.trakt.trakt.common.model.TraktId
 import tv.trakt.trakt.core.calendar.model.CalendarItem
+import tv.trakt.trakt.core.calendar.ui.context.sheet.CalendarEpisodeContextSheet
 import tv.trakt.trakt.core.discover.sections.releases.model.ReleaseType
 import tv.trakt.trakt.core.home.sections.upcoming.views.EpisodeUpcomingItemView
 import tv.trakt.trakt.core.home.sections.upcoming.views.MovieUpcomingItemView
 import tv.trakt.trakt.core.home.views.HomeEmptyView
+import tv.trakt.trakt.core.movies.ui.context.sheet.MovieContextSheet
 import tv.trakt.trakt.resources.R
 import tv.trakt.trakt.ui.components.TraktSectionHeader
 import tv.trakt.trakt.ui.components.chips.FilterChip
@@ -73,6 +78,9 @@ internal fun HomeUpcomingView(
     onCalendarClick: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    var contextEpisodeSheet by remember { mutableStateOf<CalendarItem.EpisodeItem?>(null) }
+    var contextMovieSheet by remember { mutableStateOf<Movie?>(null) }
 
     LaunchedEffect(
         state.navigateShow,
@@ -116,6 +124,24 @@ internal fun HomeUpcomingView(
         onMovieClick = {
             viewModel.navigateToMovie(it)
         },
+        onLongClick = {
+            when (it) {
+                is CalendarItem.EpisodeItem -> contextEpisodeSheet = it
+                is CalendarItem.MovieItem -> contextMovieSheet = it.movie
+            }
+        },
+    )
+
+    CalendarEpisodeContextSheet(
+        item = contextEpisodeSheet,
+        showWatchlist = false,
+        showDrop = true,
+        onDismiss = { contextEpisodeSheet = null },
+    )
+
+    MovieContextSheet(
+        movie = contextMovieSheet,
+        onDismiss = { contextMovieSheet = null },
     )
 }
 
@@ -128,6 +154,7 @@ internal fun HomeUpcomingContent(
     onClick: (CalendarItem.EpisodeItem) -> Unit = {},
     onShowClick: (CalendarItem.EpisodeItem) -> Unit = {},
     onMovieClick: (Movie) -> Unit = {},
+    onLongClick: ((CalendarItem) -> Unit)? = null,
     onEmptyClick: () -> Unit = {},
     onCalendarClick: () -> Unit = {},
     onTypeClick: (ReleaseType) -> Unit = {},
@@ -224,6 +251,7 @@ internal fun HomeUpcomingContent(
                                     onClick = onClick,
                                     onShowClick = onShowClick,
                                     onMovieClick = onMovieClick,
+                                    onLongClick = onLongClick.takeIf { state.user != null },
                                 )
                             }
                         }
@@ -288,6 +316,7 @@ private fun ContentList(
     onClick: (CalendarItem.EpisodeItem) -> Unit,
     onShowClick: (CalendarItem.EpisodeItem) -> Unit,
     onMovieClick: (Movie) -> Unit,
+    onLongClick: ((CalendarItem) -> Unit)?,
 ) {
     val currentList = remember { mutableIntStateOf(listItems.hashCode()) }
 
@@ -314,6 +343,7 @@ private fun ContentList(
                     MovieUpcomingItemView(
                         item = item,
                         onClick = { onMovieClick(item.movie) },
+                        onLongClick = onLongClick?.let { { it(item) } },
                         modifier = Modifier.animateItem(
                             fadeInSpec = null,
                             fadeOutSpec = null,
@@ -327,6 +357,7 @@ private fun ContentList(
                         midReleases = true,
                         onClick = { onClick(item) },
                         onShowClick = { onShowClick(item) },
+                        onLongClick = onLongClick?.let { { it(item) } },
                         modifier = Modifier.animateItem(
                             fadeInSpec = null,
                             fadeOutSpec = null,

@@ -28,10 +28,12 @@ internal fun MovieUpcomingItemView(
     item: CalendarItem.MovieItem,
     modifier: Modifier = Modifier,
     onClick: (TraktId) -> Unit = { },
+    onLongClick: (() -> Unit)? = null,
 ) {
     HorizontalMediaCard(
         title = "",
-        more = false,
+        more = onLongClick != null,
+        onLongClick = onLongClick,
         containerImageUrl = item.movie.images?.getFanartUrl(),
         onClick = { onClick(item.movie.ids.trakt) },
         cardContent = {
