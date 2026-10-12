@@ -12,5 +12,6 @@ internal interface RatingsUpdates {
         Default,
         MediaDetails,
         SeasonDetails,
+        RatePrompt,
     }
 }

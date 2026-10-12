@@ -45,13 +45,11 @@ internal fun ColumnScope.MainRatePromptView(
         ratePromptMedia
             .firstOrNull()
             ?.let { media ->
-                val moreMedia = ratePromptMedia.drop(1)
-
                 RatePromptView(
                     viewModel = koinViewModel(
                         key = "${media.mediaType.value}-${media.id.value}",
                     ) {
-                        parametersOf(media, moreMedia)
+                        parametersOf(media)
                     },
                     reactionsViewModel = koinViewModel(
                         key = "reactions-${media.mediaType.value}-${media.id.value}",

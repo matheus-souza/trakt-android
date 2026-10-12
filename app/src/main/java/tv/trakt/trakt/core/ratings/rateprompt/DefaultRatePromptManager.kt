@@ -6,14 +6,18 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.update
 import timber.log.Timber
 import tv.trakt.trakt.common.auth.session.SessionManager
@@ -26,13 +30,17 @@ import tv.trakt.trakt.common.helpers.extensions.recordError
 import tv.trakt.trakt.common.helpers.extensions.rethrowCancellation
 import tv.trakt.trakt.common.helpers.extensions.toInstant
 import tv.trakt.trakt.common.model.Episode
+import tv.trakt.trakt.common.model.MediaType
 import tv.trakt.trakt.common.model.Movie
 import tv.trakt.trakt.common.model.Show
 import tv.trakt.trakt.common.model.TraktId
 import tv.trakt.trakt.common.model.fromDto
 import tv.trakt.trakt.common.model.ratings.UserRating
 import tv.trakt.trakt.core.checkin.data.CheckInManager
+import tv.trakt.trakt.core.favorites.FavoritesUpdates
 import tv.trakt.trakt.core.home.sections.activity.model.HomeActivityItem
+import tv.trakt.trakt.core.ratings.data.RatingsUpdates
+import tv.trakt.trakt.core.ratings.data.RatingsUpdates.Source
 import tv.trakt.trakt.core.ratings.rateprompt.model.RatePromptMedia
 import tv.trakt.trakt.core.ratings.rateprompt.model.RatePromptMedia.MovieMedia
 import tv.trakt.trakt.core.ratings.rateprompt.model.RatePromptMedia.ShowMedia
@@ -45,16 +53,12 @@ import tv.trakt.trakt.core.user.usecases.ratings.LoadUserRatingsUseCase
 import java.time.Instant
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.toJavaDuration
 import kotlin.time.toKotlinInstant
 
 private const val UNRATED_MEDIA_LIMIT = 5
 private const val MOVIE_HISTORY_LIMIT = 10
-
-/**
- * Episodes are pulled over the whole binge window so a single request answers both
- * "watched recently" and "how many episodes of this show this week".
- */
 private const val EPISODE_HISTORY_LIMIT = 100
 
 private val RECENTLY_WATCHED_DURATION = 24.hours.toJavaDuration()
@@ -76,9 +80,26 @@ internal class DefaultRatePromptManager(
     private val updateUserSettingsUseCase: UpdateUserSettingsUseCase,
     private val userHistoryDataSource: UserHistoryRemoteDataSource,
     private val isShowRatingCandidateUseCase: IsShowRatingCandidateUseCase,
+    private val ratingsUpdates: RatingsUpdates,
+    private val favoritesUpdates: FavoritesUpdates,
 ) : RatePromptManager {
     private val state = MutableStateFlow<RatePromptState>(Idle)
+    private val heldMedia = MutableStateFlow<Set<String>>(emptySet())
     private var moviesFavorites = emptyList<FavoriteItem>()
+
+    @OptIn(FlowPreview::class)
+    override fun observeLibraryChanges(): Flow<Unit> {
+        val ratingsChanges = ratingsUpdates.observeUpdates()
+            .filter { (source, _) -> source != Source.RatePrompt }
+        val favoritesChanges = FavoritesUpdates.Source.entries
+            .filter { it != FavoritesUpdates.Source.RATE_PROMPT }
+            .map(favoritesUpdates::observeUpdates)
+            .merge()
+
+        return merge(ratingsChanges, favoritesChanges)
+            .debounce(200.milliseconds)
+            .map { refreshFromLibrary() }
+    }
 
     override suspend fun checkRecentlyWatched() {
         if (!sessionManager.isAuthenticated()) {
@@ -195,14 +216,9 @@ internal class DefaultRatePromptManager(
                 .distinctBy { it.mediaType to it.id }
                 .take(UNRATED_MEDIA_LIMIT)
 
-            if (media.isEmpty()) {
-                Timber.d("No recently watched media found, skipping rate prompt.")
-                return
-            } else {
-                Timber.d("${media.size} items for rate prompt: ${media.joinToString { it.title }}")
-            }
+            Timber.d("%d items for rate prompt: %s", media.size, media.joinToString { it.title })
 
-            state.update { UnratedMedia(media.toImmutableList()) }
+            state.update { it.withHeldMedia(media) }
         } catch (error: Exception) {
             error.rethrowCancellation {
                 Timber.recordError(error)
@@ -214,10 +230,28 @@ internal class DefaultRatePromptManager(
         return state.asStateFlow()
     }
 
+    override fun onUserInteraction(media: RatePromptMedia) {
+        heldMedia.update { it + media.dismissalKey() }
+    }
+
+    override fun onMediaRated(
+        mediaId: TraktId,
+        mediaType: MediaType,
+    ) {
+        state.update { current ->
+            val media = (current as? UnratedMedia)
+                ?.media
+                ?: return@update current
+
+            current.withHeldMedia(
+                media.filterNot { it.mediaType == mediaType && it.id == mediaId },
+            )
+        }
+    }
+
     override suspend fun onUserDismiss(
         media: RatePromptMedia,
         hasRated: Boolean,
-        hasMoreMedia: List<RatePromptMedia>,
     ) {
         val now = nowUtcInstant()
 
@@ -226,12 +260,15 @@ internal class DefaultRatePromptManager(
             dismissedMedia.add(media.toDismissalEntry(now))
             it[KEY_DISMISSED_MEDIA] = dismissedMedia
         }
+        heldMedia.update { it - media.dismissalKey() }
 
-        // If there are more media to show, update the state with the remaining media.
-        if (hasMoreMedia.isEmpty()) {
-            state.update { Idle }
-        } else {
-            state.update { UnratedMedia(hasMoreMedia.toImmutableList()) }
+        state.update { current ->
+            val remaining = (current as? UnratedMedia)
+                ?.media
+                .orEmpty()
+                .filterNot { it.mediaType == media.mediaType && it.id == media.id }
+
+            if (remaining.isEmpty()) Idle else UnratedMedia(remaining.toImmutableList())
         }
     }
 
@@ -246,7 +283,46 @@ internal class DefaultRatePromptManager(
         }
     }
 
+    private suspend fun refreshFromLibrary() {
+        if (!state.value.isActive()) {
+            return
+        }
+
+        try {
+            val moviesRatings = userRatingsUseCase.loadLocalMovies()
+            val showsRatings = userRatingsUseCase.loadLocalShows()
+            moviesFavorites = userFavoritesUseCase.loadLocalMovies()
+
+            state.update { current ->
+                val media = (current as? UnratedMedia)
+                    ?.media
+                    ?: return@update current
+
+                val unrated = media
+                    .filterNot {
+                        when (it) {
+                            is MovieMedia -> moviesRatings.contains(it.id)
+                            is ShowMedia -> showsRatings.contains(it.id)
+                        }
+                    }
+                    .map {
+                        when (it) {
+                            is MovieMedia -> it.copy(favorite = moviesFavorites.any { item -> item.id == it.id })
+                            is ShowMedia -> it
+                        }
+                    }
+
+                current.withHeldMedia(unrated)
+            }
+        } catch (error: Exception) {
+            error.rethrowCancellation {
+                Timber.recordError(error)
+            }
+        }
+    }
+
     override fun clear() {
+        heldMedia.update { emptySet() }
         state.update { Idle }
     }
 
@@ -260,7 +336,19 @@ internal class DefaultRatePromptManager(
             .mapTo(mutableSetOf()) { it.substringBeforeLast(DISMISSAL_SEPARATOR) }
     }
 
-    /** Dismissals only hold for the recently watched window, mirroring how long the prompt can surface an item. */
+    private fun RatePromptState.withHeldMedia(candidates: List<RatePromptMedia>): RatePromptState {
+        val held = (this as? UnratedMedia)
+            ?.media
+            .orEmpty()
+            .filter { heldMedia.value.contains(it.dismissalKey()) }
+
+        val media = (held + candidates)
+            .distinctBy { it.mediaType to it.id }
+            .take(UNRATED_MEDIA_LIMIT)
+
+        return if (media.isEmpty()) Idle else UnratedMedia(media.toImmutableList())
+    }
+
     private fun Preferences.dismissedMedia(now: Instant): Set<String> {
         val cutoff = now.minus(RECENTLY_WATCHED_DURATION).toEpochMilli()
 

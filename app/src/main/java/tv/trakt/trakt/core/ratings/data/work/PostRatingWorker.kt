@@ -24,6 +24,7 @@ import tv.trakt.trakt.common.model.toTraktId
 import tv.trakt.trakt.core.ratings.DeleteRatingUseCase
 import tv.trakt.trakt.core.ratings.PostRatingUseCase
 import tv.trakt.trakt.core.ratings.data.RatingsUpdates
+import tv.trakt.trakt.core.ratings.rateprompt.RatePromptManager
 import tv.trakt.trakt.core.user.usecases.ratings.LoadUserRatingsUseCase
 import java.io.IOException
 import java.util.concurrent.TimeUnit.SECONDS
@@ -40,6 +41,7 @@ internal class PostRatingWorker(
     val deleteRatingUseCase: DeleteRatingUseCase,
     val loadUserRatingUseCase: LoadUserRatingsUseCase,
     val ratingsUpdates: RatingsUpdates,
+    val ratePromptManager: RatePromptManager,
     val errorsManager: GlobalErrorsManager,
     val analytics: Analytics,
 ) : CoroutineWorker(appContext, workerParams) {
@@ -127,6 +129,13 @@ internal class PostRatingWorker(
 
             Timber.d("Max retry attempts reached, failing work")
             return failPosting(error)
+        }
+
+        if (ratingValue > 0 && source != RatingsUpdates.Source.RatePrompt) {
+            ratePromptManager.onMediaRated(
+                mediaId = mediaId.toTraktId(),
+                mediaType = mediaType,
+            )
         }
 
         try {

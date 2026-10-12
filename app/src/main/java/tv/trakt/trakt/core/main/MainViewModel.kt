@@ -176,6 +176,9 @@ internal class MainViewModel(
                 ratePromptState.update { state }
             }
             .launchIn(viewModelScope)
+
+        ratePromptManager.observeLibraryChanges()
+            .launchIn(viewModelScope)
     }
 
     private fun observeInAppReview() {

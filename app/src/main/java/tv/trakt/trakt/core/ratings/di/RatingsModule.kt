@@ -58,6 +58,8 @@ internal val ratingsDataModule = module {
             updateUserSettingsUseCase = get(),
             userHistoryDataSource = get(),
             isShowRatingCandidateUseCase = get(),
+            ratingsUpdates = get(),
+            favoritesUpdates = get(),
         )
     }
 
@@ -65,10 +67,9 @@ internal val ratingsDataModule = module {
 }
 
 internal val ratingsModule = module {
-    viewModel { (media: RatePromptMedia, moreMedia: List<RatePromptMedia>) ->
+    viewModel { (media: RatePromptMedia) ->
         RatePromptViewModel(
             media = media,
-            moreMedia = moreMedia,
             appContext = androidApplication(),
             sessionManager = get(),
             ratePromptManager = get(),
@@ -101,6 +102,7 @@ internal val ratingsModule = module {
             deleteRatingUseCase = get(),
             loadUserRatingUseCase = get(),
             ratingsUpdates = get(),
+            ratePromptManager = get(),
             errorsManager = get(),
             analytics = get(),
         )

@@ -11,7 +11,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -40,7 +42,6 @@ import java.time.Instant
 
 internal class RatePromptViewModel(
     private val media: RatePromptMedia,
-    private val moreMedia: List<RatePromptMedia>,
     private val appContext: Context,
     private val sessionManager: SessionManager,
     private val ratePromptManager: RatePromptManager,
@@ -73,6 +74,21 @@ internal class RatePromptViewModel(
                 ratePromptState.update { state }
             }
             .launchIn(viewModelScope)
+
+        // Favorites changed outside the prompt reach this media through the manager.
+        ratePromptManager.observe()
+            .mapNotNull { state ->
+                (state as? RatePromptState.UnratedMedia)
+                    ?.media
+                    ?.find { it.mediaType == media.mediaType && it.id == media.id }
+                    ?.favorite
+            }
+            .distinctUntilChanged()
+            .drop(1)
+            .onEach { favorite ->
+                favoriteState.update { favorite }
+            }
+            .launchIn(viewModelScope)
     }
 
     fun addRating(newRating: Int) {
@@ -87,6 +103,7 @@ internal class RatePromptViewModel(
                 return@launch
             }
 
+            ratePromptManager.onUserInteraction(media)
             ratingsState.update { newRating }
             dismissingState.update { nowUtcInstant() }
 
@@ -95,7 +112,7 @@ internal class RatePromptViewModel(
                 mediaId = media.id,
                 mediaType = media.mediaType,
                 rating = newRating,
-                source = RatingsUpdates.Source.Default,
+                source = RatingsUpdates.Source.RatePrompt,
             )
         }
     }
@@ -112,6 +129,7 @@ internal class RatePromptViewModel(
                 return@launch
             }
 
+            ratePromptManager.onUserInteraction(media)
             ratingsState.update { null }
             dismissingState.update { nowUtcInstant() }
 
@@ -120,7 +138,7 @@ internal class RatePromptViewModel(
                 mediaId = media.id,
                 mediaType = media.mediaType,
                 rating = 0, // A rating of 0 indicates removal of rating
-                source = RatingsUpdates.Source.Default,
+                source = RatingsUpdates.Source.RatePrompt,
             )
         }
     }
@@ -134,6 +152,7 @@ internal class RatePromptViewModel(
             }
 
             try {
+                ratePromptManager.onUserInteraction(media)
                 loadingState.update { Loading }
                 dismissingState.update { nowUtcInstant() }
 
@@ -175,6 +194,7 @@ internal class RatePromptViewModel(
             }
 
             try {
+                ratePromptManager.onUserInteraction(media)
                 loadingState.update { Loading }
                 dismissingState.update { nowUtcInstant() }
 
@@ -196,6 +216,7 @@ internal class RatePromptViewModel(
     }
 
     fun onReactionToggle() {
+        ratePromptManager.onUserInteraction(media)
         dismissingState.update { nowUtcInstant() }
     }
 
@@ -209,7 +230,6 @@ internal class RatePromptViewModel(
                 ratePromptManager.onUserDismiss(
                     media = media,
                     hasRated = ratingsState.value != null || favoriteState.value,
-                    hasMoreMedia = moreMedia,
                 )
             } catch (error: Exception) {
                 error.rethrowCancellation {
