@@ -9,5 +9,6 @@ internal data class ShowsWatchlistState(
     val isLoading: Boolean = false,
     val isLoadingPage: Boolean = false,
     val shows: ImmutableList<Show>? = null,
+    val itemCount: Int? = null,
     val error: Exception? = null,
 )

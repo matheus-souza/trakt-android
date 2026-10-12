@@ -33,6 +33,7 @@ import androidx.tv.material3.Text
 import kotlinx.collections.immutable.toImmutableList
 import tv.trakt.trakt.app.common.ui.GenericErrorView
 import tv.trakt.trakt.app.common.ui.mediacards.VerticalMediaCard
+import tv.trakt.trakt.app.core.details.lists.ListItemCount
 import tv.trakt.trakt.app.core.details.ui.BackdropImage
 import tv.trakt.trakt.app.core.lists.ListsConfig.LISTS_NEXT_PAGE_OFFSET
 import tv.trakt.trakt.app.core.lists.ListsConfig.LISTS_PAGE_LIMIT
@@ -101,17 +102,24 @@ private fun ShowsWatchlistContent(
             ),
         ) {
             item(span = { GridItemSpan(maxLineSpan) }) {
-                Text(
-                    text = stringResource(R.string.list_title_watchlist_shows),
-                    color = TraktTheme.colors.textPrimary,
-                    style = TraktTheme.typography.heading4,
-                    overflow = TextOverflow.Ellipsis,
+                Column(
+                    verticalArrangement = spacedBy(4.dp),
                     modifier = Modifier
                         .focusProperties {
                             down = focusRequesters.values.firstOrNull() ?: FocusRequester.Default
                         }
                         .focusable(),
-                )
+                ) {
+                    Text(
+                        text = stringResource(R.string.list_title_watchlist_shows),
+                        color = TraktTheme.colors.textPrimary,
+                        style = TraktTheme.typography.heading4,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    state.itemCount?.let {
+                        ListItemCount(count = it)
+                    }
+                }
             }
 
             if (state.isLoading && state.shows.isNullOrEmpty()) {
@@ -222,6 +230,7 @@ private fun Preview() {
                 shows = (1..20).map {
                     PreviewData.show1.copy(ids = Ids(TraktId(it), SlugId(it.toString())))
                 }.toImmutableList(),
+                itemCount = 42,
             ),
             onShowClick = {},
             onLoadNextPage = {},

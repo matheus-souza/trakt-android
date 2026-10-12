@@ -2,20 +2,27 @@ package tv.trakt.trakt.app.core.lists.details.movies
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.plus
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import tv.trakt.trakt.app.core.lists.ListsConfig.LISTS_PAGE_LIMIT
 import tv.trakt.trakt.app.core.lists.usecases.GetListsMoviesWatchlistUseCase
+import tv.trakt.trakt.common.core.user.CollectionStateProvider
 import tv.trakt.trakt.common.helpers.extensions.rethrowCancellation
+import tv.trakt.trakt.common.model.MediaMode
+import tv.trakt.trakt.common.model.Movie
 
+@Suppress("UNCHECKED_CAST")
 internal class MoviesWatchlistViewModel(
+    collectionStateProvider: CollectionStateProvider,
     private val getListItemsUseCase: GetListsMoviesWatchlistUseCase,
 ) : ViewModel() {
     private val initialState = MoviesWatchlistState()
@@ -30,6 +37,7 @@ internal class MoviesWatchlistViewModel(
 
     init {
         loadData()
+        collectionStateProvider.launchIn(viewModelScope)
     }
 
     private fun loadData() {
@@ -86,13 +94,19 @@ internal class MoviesWatchlistViewModel(
         loadingState,
         loadingPageState,
         moviesState,
+        collectionStateProvider.stateFlow.map { collection ->
+            collection
+                .watchlistCount(MediaMode.Movies)
+                .takeIf { it > 0 }
+        },
         errorState,
-    ) { s1, s2, s3, s4 ->
+    ) { state ->
         MoviesWatchlistState(
-            isLoading = s1,
-            isLoadingPage = s2,
-            movies = s3,
-            error = s4,
+            isLoading = state[0] as Boolean,
+            isLoadingPage = state[1] as Boolean,
+            movies = state[2] as ImmutableList<Movie>?,
+            itemCount = state[3] as Int?,
+            error = state[4] as Exception?,
         )
     }.stateIn(
         scope = viewModelScope,

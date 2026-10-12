@@ -9,5 +9,6 @@ internal data class MoviesWatchlistState(
     val isLoading: Boolean = false,
     val isLoadingPage: Boolean = false,
     val movies: ImmutableList<Movie>? = null,
+    val itemCount: Int? = null,
     val error: Exception? = null,
 )

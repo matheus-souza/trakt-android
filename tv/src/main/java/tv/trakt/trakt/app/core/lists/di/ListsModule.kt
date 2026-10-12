@@ -91,17 +91,9 @@ internal val listsModule = module {
         )
     }
 
-    viewModel {
-        MoviesWatchlistViewModel(
-            getListItemsUseCase = get(),
-        )
-    }
+    viewModelOf(::MoviesWatchlistViewModel)
 
-    viewModel {
-        ShowsWatchlistViewModel(
-            getListItemsUseCase = get(),
-        )
-    }
+    viewModelOf(::ShowsWatchlistViewModel)
 
     viewModelOf(::SmartListViewModel)
 

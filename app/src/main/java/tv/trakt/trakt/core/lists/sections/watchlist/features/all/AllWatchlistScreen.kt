@@ -50,6 +50,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import tv.trakt.trakt.common.core.lists.model.WatchlistItem
@@ -83,6 +84,7 @@ import tv.trakt.trakt.ui.components.MediaModeFilters
 import tv.trakt.trakt.ui.components.ScrollableBackdropImage
 import tv.trakt.trakt.ui.components.TraktHeader
 import tv.trakt.trakt.ui.components.dateselection.DateSelectionSheet
+import tv.trakt.trakt.ui.components.lists.ListItemCount
 import tv.trakt.trakt.ui.components.mediacards.skeletons.PanelMediaSkeletonCard
 import tv.trakt.trakt.ui.components.sorting.SortingSplitButton
 import tv.trakt.trakt.ui.components.sorting.sheets.SortSelectionSheet
@@ -293,6 +295,10 @@ internal fun AllWatchlistContent(
             listFilter = state.filter,
             listSorting = state.sorting,
             collection = state.collection,
+            itemCount = state.filter
+                ?.takeUnless { it.isActive }
+                ?.let { state.collection.watchlistCount(it.mode) }
+                ?.takeIf { it > 0 },
             loading = state.loading.isLoading,
             loadingMore = state.loadingMore.isLoading,
             contentPadding = contentPadding,
@@ -313,6 +319,7 @@ internal fun AllWatchlistContent(
 @Composable
 private fun TitleBar(
     enabled: Boolean,
+    itemCount: Int?,
     filters: GlobalFilter?,
     onFiltersClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -338,6 +345,9 @@ private fun TitleBar(
             )
             TraktHeader(
                 title = stringResource(R.string.page_title_watchlist),
+                subtitleTrailing = itemCount?.let {
+                    { ListItemCount(count = it) }
+                },
             )
         }
 
@@ -363,6 +373,7 @@ private fun ContentList(
     listFilter: GlobalFilter?,
     listSorting: Sorting,
     collection: UserCollectionState,
+    itemCount: Int?,
     loading: Boolean,
     loadingMore: Boolean,
     contentPadding: PaddingValues,
@@ -408,6 +419,7 @@ private fun ContentList(
         item {
             TitleBar(
                 enabled = !loading,
+                itemCount = itemCount,
                 filters = listFilter,
                 onFiltersClick = onFiltersClick,
                 modifier = Modifier
@@ -533,7 +545,7 @@ private fun ContentFilters(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                top = 2.dp,
+                top = 9.dp,
                 bottom = 19.dp,
             ),
     ) {
@@ -601,7 +613,13 @@ private fun WatchlistDateSelectionSheet(
 private fun Preview() {
     TraktTheme {
         AllWatchlistContent(
-            state = AllWatchlistState(),
+            state = AllWatchlistState(
+                filter = GlobalFilter.Default,
+                collection = UserCollectionState(
+                    watchlistShows = persistentSetOf(TraktId(1), TraktId(2)),
+                    watchlistMovies = persistentSetOf(TraktId(3)),
+                ),
+            ),
         )
     }
 }

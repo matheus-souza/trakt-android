@@ -3,7 +3,6 @@ package tv.trakt.trakt.common.core.user
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toImmutableSet
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -42,7 +41,6 @@ class CollectionStateProvider(
 
     private val loadingLock = Mutex()
 
-    @OptIn(FlowPreview::class)
     fun launchIn(scope: CoroutineScope) {
         merge(
             progressUpdates.observeUpdates(),

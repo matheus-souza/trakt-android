@@ -5,6 +5,7 @@ import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.ImmutableSet
 import kotlinx.collections.immutable.persistentMapOf
 import tv.trakt.trakt.common.helpers.extensions.EmptyImmutableSet
+import tv.trakt.trakt.common.model.MediaMode
 import tv.trakt.trakt.common.model.MediaType
 import tv.trakt.trakt.common.model.MediaType.Movie
 import tv.trakt.trakt.common.model.MediaType.Show
@@ -19,6 +20,14 @@ data class UserCollectionState(
 ) {
     companion object Companion {
         val Default = UserCollectionState()
+    }
+
+    fun watchlistCount(mode: MediaMode): Int {
+        return when (mode) {
+            MediaMode.Media -> watchlistShows.size + watchlistMovies.size
+            MediaMode.Shows -> watchlistShows.size
+            MediaMode.Movies -> watchlistMovies.size
+        }
     }
 
     fun isWatchlist(

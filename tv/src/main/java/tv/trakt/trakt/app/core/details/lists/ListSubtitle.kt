@@ -91,10 +91,10 @@ internal fun ListPrivacySubtitle(
 }
 
 @Composable
-private fun ListItemCount(
+internal fun ListItemCount(
     count: Int,
-    style: TextStyle,
     modifier: Modifier = Modifier,
+    style: TextStyle = TraktTheme.typography.paragraphSmall,
 ) {
     Row(
         horizontalArrangement = spacedBy(3.dp),
