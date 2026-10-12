@@ -67,11 +67,11 @@ internal fun ListsSmartView(
             modifier = Modifier
                 .padding(contentPadding)
                 .graphicsLayer {
-                    translationX = -5.dp.toPx()
+                    translationX = -4.dp.toPx()
                 },
         ) {
             Icon(
-                painter = painterResource(R.drawable.ic_bolt),
+                painter = painterResource(R.drawable.ic_smart),
                 contentDescription = null,
                 tint = TraktTheme.colors.textPrimary,
                 modifier = Modifier.size(22.dp),

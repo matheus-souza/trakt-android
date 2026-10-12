@@ -36,7 +36,7 @@ internal fun CreateListTypeView(
         modifier = modifier,
     ) {
         CreateListTypeRow(
-            icon = R.drawable.ic_bolt,
+            icon = R.drawable.ic_smart,
             iconSize = 24.dp,
             title = stringResource(R.string.button_text_smart_lists),
             description = stringResource(R.string.text_cta_smart_lists),

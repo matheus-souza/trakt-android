@@ -16,7 +16,7 @@ internal enum class PersonalListType(
 ) {
     Smart(
         R.string.button_text_smart_lists,
-        R.drawable.ic_bolt,
+        R.drawable.ic_smart,
     ),
     Personal(
         R.string.button_text_personal,
