@@ -3,6 +3,7 @@ package tv.trakt.trakt.app.core.profile.sections.library.viewall
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.collections.immutable.plus
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -72,8 +73,12 @@ internal class ProfileLibraryViewAllViewModel(
                     availableOn = "plex",
                 )
 
-                itemsState.update {
-                    it?.toPersistentList()?.plus(items)
+                itemsState.update { current ->
+                    current
+                        ?.toPersistentList()
+                        ?.plus(items)
+                        ?.distinctBy { it.key }
+                        ?.toImmutableList()
                 }
 
                 hasMoreData = (items.size >= LIBRARY_ALL_PAGE_LIMIT)

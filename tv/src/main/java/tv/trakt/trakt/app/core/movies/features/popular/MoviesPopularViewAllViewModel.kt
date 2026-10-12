@@ -3,6 +3,7 @@ package tv.trakt.trakt.app.core.movies.features.popular
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.collections.immutable.plus
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -75,8 +76,12 @@ internal class MoviesPopularViewAllViewModel(
                     page = nextDataPage,
                 )
 
-                moviesState.update {
-                    it?.toPersistentList()?.plus(movies)
+                moviesState.update { current ->
+                    current
+                        ?.toPersistentList()
+                        ?.plus(movies)
+                        ?.distinctBy { it.ids.trakt }
+                        ?.toImmutableList()
                 }
 
                 hasMoreData = (movies.size >= 50)

@@ -3,6 +3,7 @@ package tv.trakt.trakt.app.core.shows.features.popular
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.collections.immutable.plus
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -75,8 +76,12 @@ internal class ShowsPopularViewAllViewModel(
                     page = nextDataPage,
                 )
 
-                showsState.update {
-                    it?.toPersistentList()?.plus(shows)
+                showsState.update { current ->
+                    current
+                        ?.toPersistentList()
+                        ?.plus(shows)
+                        ?.distinctBy { it.ids.trakt }
+                        ?.toImmutableList()
                 }
 
                 hasMoreData = (shows.size >= SHOWS_PAGE_LIMIT)

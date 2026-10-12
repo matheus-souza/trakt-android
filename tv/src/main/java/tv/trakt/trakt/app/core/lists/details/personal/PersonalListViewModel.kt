@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import kotlinx.collections.immutable.plus
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -80,8 +81,12 @@ internal class PersonalListViewModel(
                     page = nextDataPage,
                 )
 
-                itemsState.update {
-                    it?.toPersistentList()?.plus(shows)
+                itemsState.update { current ->
+                    current
+                        ?.toPersistentList()
+                        ?.plus(shows)
+                        ?.distinctBy { it.id }
+                        ?.toImmutableList()
                 }
 
                 hasMoreData = (shows.size >= PERSONAL_LIST_PAGE_LIMIT)

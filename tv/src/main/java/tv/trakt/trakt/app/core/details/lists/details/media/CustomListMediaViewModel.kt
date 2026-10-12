@@ -145,8 +145,8 @@ internal class CustomListMediaViewModel(
                     )
                 }
 
-                itemsState.update { items ->
-                    items
+                itemsState.update { current ->
+                    current
                         ?.plus(items)
                         ?.distinctBy { it.key }
                         ?.toImmutableList()
