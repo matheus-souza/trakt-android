@@ -14,9 +14,12 @@ import kotlinx.coroutines.SupervisorJob
 import org.koin.android.ext.koin.androidApplication
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.viewModelOf
+import org.koin.core.module.dsl.viewModel
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import tv.trakt.trakt.core.calendar.CalendarViewModel
+import tv.trakt.trakt.core.calendar.model.CalendarItem
+import tv.trakt.trakt.core.calendar.ui.context.CalendarEpisodeContextViewModel
 import tv.trakt.trakt.core.calendar.usecases.GetCalendarItemsUseCase
 import tv.trakt.trakt.core.calendar.usecases.GetCalendarTypeUseCase
 
@@ -38,6 +41,24 @@ internal val calendarModule = module {
     factoryOf(::GetCalendarItemsUseCase)
 
     viewModelOf(::CalendarViewModel)
+
+    viewModel { (item: CalendarItem.EpisodeItem) ->
+        CalendarEpisodeContextViewModel(
+            item = item,
+            updateHistoryUseCase = get(),
+            updateWatchlistUseCase = get(),
+            userProgressLocalSource = get(),
+            userWatchlistLocalSource = get(),
+            userWatchlistMinLocalSource = get(),
+            loadProgressUseCase = get(),
+            loadWatchlistUseCase = get(),
+            episodeUpdates = get(),
+            watchlistUpdates = get(),
+            sessionManager = get(),
+            errorsManager = get(),
+            analytics = get(),
+        )
+    }
 }
 
 private fun createStore(context: Context): DataStore<Preferences> {

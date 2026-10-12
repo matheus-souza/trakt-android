@@ -42,14 +42,13 @@ import tv.trakt.trakt.common.helpers.LoadingState.Loading
 import tv.trakt.trakt.common.helpers.extensions.onClick
 import tv.trakt.trakt.common.model.Episode
 import tv.trakt.trakt.common.model.Movie
-import tv.trakt.trakt.common.model.Show
 import tv.trakt.trakt.common.model.TraktId
 import tv.trakt.trakt.core.calendar.model.CalendarItem
+import tv.trakt.trakt.core.calendar.ui.context.sheet.CalendarEpisodeContextSheet
 import tv.trakt.trakt.core.discover.sections.releases.model.ReleaseType
 import tv.trakt.trakt.core.discover.sections.releases.views.EpisodeReleasesItemView
 import tv.trakt.trakt.core.discover.sections.releases.views.MovieReleasesItemView
 import tv.trakt.trakt.core.movies.ui.context.sheet.MovieContextSheet
-import tv.trakt.trakt.core.shows.ui.context.sheet.ShowContextSheet
 import tv.trakt.trakt.resources.R
 import tv.trakt.trakt.ui.components.EmptyListCard
 import tv.trakt.trakt.ui.components.TraktSectionHeader
@@ -71,7 +70,7 @@ internal fun DiscoverReleasesView(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    var contextShowSheet by remember { mutableStateOf<Show?>(null) }
+    var contextEpisodeSheet by remember { mutableStateOf<CalendarItem.EpisodeItem?>(null) }
     var contextMovieSheet by remember { mutableStateOf<Movie?>(null) }
 
     DiscoverReleasesContent(
@@ -95,20 +94,18 @@ internal fun DiscoverReleasesView(
             }
             when (it) {
                 is CalendarItem.MovieItem -> contextMovieSheet = it.movie
-                is CalendarItem.EpisodeItem -> contextShowSheet = it.show
+                is CalendarItem.EpisodeItem -> contextEpisodeSheet = it
             }
         },
     )
 
-    ShowContextSheet(
-        show = contextShowSheet,
-        showWatched = false,
-        onDismiss = { contextShowSheet = null },
+    CalendarEpisodeContextSheet(
+        item = contextEpisodeSheet,
+        onDismiss = { contextEpisodeSheet = null },
     )
 
     MovieContextSheet(
         movie = contextMovieSheet,
-        showWatched = false,
         onDismiss = { contextMovieSheet = null },
     )
 }
