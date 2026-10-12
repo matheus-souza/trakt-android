@@ -46,7 +46,7 @@ import tv.trakt.trakt.ui.theme.TraktTheme
 
 private const val GRID_COLUMNS = 6
 private val CellSize = 44.dp
-private val EmojiFontSize = 28.sp
+private val EmojiFontSize = 27.sp
 private val HeaderInset = 10.dp
 
 @Composable
@@ -192,6 +192,7 @@ private fun NamedReactionEmoji(
             enabled = enabled,
             size = CellSize,
             fontSize = EmojiFontSize,
+            highlightColor = TraktTheme.colors.reactionsPickerHighlight,
             onClick = onClick,
             onLongClick = { scope.launch { tooltipState.show() } },
         )
@@ -240,7 +241,7 @@ private fun PreviewSearching() {
 private fun PreviewLimitReached() {
     TraktThemeLightDark {
         MediaReactionsPickerView(
-            userReactions = persistentListOf(MediaReaction.Popcorn, MediaReaction.Fire, MediaReaction.Nerd),
+            userReactions = persistentListOf(MediaReaction.HeartEyes, MediaReaction.Fire, MediaReaction.Nerd),
             isLimitReached = true,
             onReactionClick = {},
         )
