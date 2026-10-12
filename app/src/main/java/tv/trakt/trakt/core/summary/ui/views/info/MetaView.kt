@@ -30,7 +30,7 @@ internal fun MetaView(
         modifier = modifier,
     ) {
         MetaViewItemView(
-            title = rememberThousandsFormat(if (released) plays else 0),
+            title = rememberThousandsFormat(if (released) plays else 0, 3),
             subtitle = stringResource(R.string.stat_text_plays),
             icon = {
                 Icon(
@@ -50,7 +50,7 @@ internal fun MetaView(
         )
 
         MetaViewItemView(
-            title = rememberThousandsFormat(if (released) watchers else 0),
+            title = rememberThousandsFormat(if (released) watchers else 0, 3),
             subtitle = stringResource(R.string.stat_text_watchers),
             icon = {
                 Icon(
@@ -66,7 +66,7 @@ internal fun MetaView(
         )
 
         MetaViewItemView(
-            title = rememberThousandsFormat(lists),
+            title = rememberThousandsFormat(lists, 3),
             subtitle = stringResource(R.string.stat_text_lists),
             icon = {
                 Icon(
@@ -83,7 +83,7 @@ internal fun MetaView(
 
         favorites?.let {
             MetaViewItemView(
-                title = rememberThousandsFormat(if (released) it else 0),
+                title = rememberThousandsFormat(if (released) it else 0, 3),
                 subtitle = stringResource(R.string.stat_text_favorited),
                 icon = {
                     Icon(

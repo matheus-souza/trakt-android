@@ -31,11 +31,12 @@ import kotlin.math.abs
  */
 private fun Int.thousandsFormat(
     locale: Locale = AppCompatDelegate.getApplicationLocales().get(0) ?: Locale.getDefault(),
+    significantDigits: Int,
 ): String {
     if (this < 1000) return this.toString()
     val fmt = CompactDecimalFormat.getInstance(locale, CompactDecimalFormat.CompactStyle.SHORT)
         .apply {
-            maximumSignificantDigits = 3
+            maximumSignificantDigits = significantDigits
         }
     return fmt.format(this)
 }
@@ -44,11 +45,14 @@ private fun Int.thousandsFormat(
  * Composable function that formats an integer into a compact string representation using thousands and remembers the result.
  */
 @Composable
-fun rememberThousandsFormat(count: Int): String {
+fun rememberThousandsFormat(
+    count: Int,
+    significantDigits: Int = 2,
+): String {
     val configuration = LocalConfiguration.current
     return remember(count, configuration) {
         val configurationLocale = AppCompatDelegate.getApplicationLocales().get(0) ?: Locale.getDefault()
-        count.thousandsFormat(configurationLocale)
+        count.thousandsFormat(configurationLocale, significantDigits)
     }
 }
 
