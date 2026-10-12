@@ -90,6 +90,7 @@ import tv.trakt.trakt.core.comments.ui.CommentSkeletonCard
 import tv.trakt.trakt.core.comments.ui.CommentUserChips
 import tv.trakt.trakt.core.reactions.ui.ReactionsSummaryChip
 import tv.trakt.trakt.core.reactions.ui.ReactionsToolTip
+import tv.trakt.trakt.core.userprofile.navigation.canNavigateToUserProfile
 import tv.trakt.trakt.resources.R
 import tv.trakt.trakt.ui.theme.TraktTheme
 import java.util.Locale
@@ -102,6 +103,7 @@ internal fun CommentDetailsView(
     mentionSource: MentionSource? = null,
     progressTotal: Int? = null,
     onDeleteComment: (commentId: TraktId) -> Unit = {},
+    onUserClick: ((User) -> Unit)? = null,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val openExternalTranslation = rememberExternalTranslation()
@@ -148,6 +150,13 @@ internal fun CommentDetailsView(
             reportCommentSheet = comment
         },
         onTranslateClick = viewModel::toggleTranslation,
+        onUserClick = onUserClick?.let { userClick ->
+            { user ->
+                if (canNavigateToUserProfile(user, state.user?.ids?.trakt)) {
+                    userClick(user)
+                }
+            }
+        },
     )
 
     PostReplySheet(
@@ -219,6 +228,7 @@ private fun CommentDetailsViewContent(
     onDeleteReplyClick: ((Comment) -> Unit)? = null,
     onReportClick: ((Comment) -> Unit)? = null,
     onTranslateClick: ((Comment) -> Unit)? = null,
+    onUserClick: ((User) -> Unit)? = null,
 ) {
     LazyColumn(
         verticalArrangement = spacedBy(16.dp),
@@ -243,6 +253,7 @@ private fun CommentDetailsViewContent(
                     onDeleteReplyClick = onDeleteReplyClick,
                     onReportClick = { onReportClick?.invoke(comment) },
                     onTranslateClick = onTranslateClick,
+                    onUserClick = onUserClick,
                 )
             }
         }
@@ -285,6 +296,7 @@ private fun CommentContent(
     onDeleteReplyClick: ((Comment) -> Unit)? = null,
     onReportClick: (() -> Unit)? = null,
     onTranslateClick: ((Comment) -> Unit)? = null,
+    onUserClick: ((User) -> Unit)? = null,
 ) {
     var isCollapsed by remember { mutableStateOf(true) }
 
@@ -298,6 +310,7 @@ private fun CommentContent(
             onEditClick = onEditClick,
             onDeleteClick = onDeleteClick,
             onReportClick = onReportClick,
+            onUserClick = onUserClick,
             modifier = Modifier.padding(top = 5.dp),
         )
 
@@ -369,6 +382,7 @@ private fun CommentContent(
                             onReplyClick = { onReplyClick?.invoke(reply.user) },
                             onDeleteClick = { onDeleteReplyClick?.invoke(reply) },
                             onTranslateClick = onTranslateClick,
+                            onUserClick = onUserClick,
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
@@ -387,6 +401,7 @@ private fun CommentHeader(
     onEditClick: (() -> Unit)? = null,
     onDeleteClick: (() -> Unit)? = null,
     onReportClick: (() -> Unit)? = null,
+    onUserClick: ((User) -> Unit)? = null,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -394,7 +409,11 @@ private fun CommentHeader(
         modifier = modifier,
     ) {
         Box(
-            modifier = Modifier.size(36.dp),
+            modifier = Modifier
+                .size(36.dp)
+                .onClick(enabled = onUserClick != null) {
+                    onUserClick?.invoke(comment.user)
+                },
         ) {
             val avatarBorder = when {
                 comment.user.isAnyVip -> TraktTheme.colors.vipAccent
@@ -433,6 +452,10 @@ private fun CommentHeader(
                     color = TraktTheme.colors.textPrimary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .onClick(enabled = onUserClick != null) {
+                            onUserClick?.invoke(comment.user)
+                        },
                 )
             }
             Text(
