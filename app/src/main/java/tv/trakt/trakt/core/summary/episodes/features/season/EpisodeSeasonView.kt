@@ -39,7 +39,9 @@ import tv.trakt.trakt.common.helpers.LoadingState.Loading
 import tv.trakt.trakt.common.helpers.extensions.onClick
 import tv.trakt.trakt.common.model.Episode
 import tv.trakt.trakt.core.summary.episodes.features.season.ui.EpisodeSeasonList
+import tv.trakt.trakt.core.summary.shows.features.context.episodes.EpisodeContextSheet
 import tv.trakt.trakt.core.summary.shows.features.seasons.model.EpisodeItem
+import tv.trakt.trakt.core.summary.shows.features.seasons.watcheduntil.WatchedUntilSheet
 import tv.trakt.trakt.resources.R
 import tv.trakt.trakt.ui.components.TraktSectionHeader
 import tv.trakt.trakt.ui.components.confirmation.RemoveConfirmationSheet
@@ -66,6 +68,8 @@ internal fun EpisodeSeasonView(
     val scope = rememberCoroutineScope()
     var confirmRemoveSheet by remember { mutableStateOf<EpisodeItem?>(null) }
     var dateSheet by remember { mutableStateOf<EpisodeItem?>(null) }
+    var contextSheet by remember { mutableStateOf<EpisodeItem?>(null) }
+    var watchedUntilSheet by remember { mutableStateOf<EpisodeItem?>(null) }
 
     EpisodeSeasonContent(
         state = state,
@@ -81,8 +85,32 @@ internal fun EpisodeSeasonView(
         onCheckLongClick = {
             dateSheet = it
         },
+        onMoreClick = {
+            contextSheet = it
+        },
+    )
+
+    EpisodeContextSheet(
+        episodeItem = contextSheet,
+        onTrackClick = {
+            dateSheet = it
+        },
+        onWatchedUntilClick = {
+            watchedUntilSheet = it
+        },
         onRemoveClick = {
             confirmRemoveSheet = it
+        },
+        onDismiss = {
+            contextSheet = null
+        },
+    )
+
+    WatchedUntilSheet(
+        show = state.show,
+        episode = watchedUntilSheet?.episode,
+        onDismiss = {
+            watchedUntilSheet = null
         },
     )
 
@@ -105,7 +133,7 @@ internal fun EpisodeSeasonView(
     DateSelectionSheet(
         active = dateSheet != null,
         title = state.show?.title ?: "",
-        subtitle = state.episode?.title ?: "",
+        subtitle = dateSheet?.episode?.title ?: "",
         onResult = { result ->
             dateSheet?.let {
                 viewModel.addToWatched(
@@ -149,7 +177,7 @@ private fun EpisodeSeasonContent(
     onEpisodeClick: ((EpisodeItem) -> Unit)? = null,
     onCheckClick: ((EpisodeItem) -> Unit)? = null,
     onCheckLongClick: ((EpisodeItem) -> Unit)? = null,
-    onRemoveClick: ((EpisodeItem) -> Unit)? = null,
+    onMoreClick: ((EpisodeItem) -> Unit)? = null,
     onAllSeasonsClick: ((Int?) -> Unit)? = null,
 ) {
     var animateCollapse by rememberSaveable { mutableStateOf(false) }
@@ -210,7 +238,7 @@ private fun EpisodeSeasonContent(
                                 onEpisodeClick = onEpisodeClick ?: {},
                                 onCheckClick = onCheckClick ?: {},
                                 onCheckLongClick = onCheckLongClick ?: {},
-                                onRemoveClick = onRemoveClick ?: {},
+                                onMoreClick = onMoreClick ?: {},
                                 modifier = Modifier.fillMaxWidth(),
                             )
                         }

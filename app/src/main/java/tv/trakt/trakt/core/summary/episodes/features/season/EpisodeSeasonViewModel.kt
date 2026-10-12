@@ -42,6 +42,7 @@ import tv.trakt.trakt.core.summary.episodes.features.season.usecases.GetEpisodeS
 import tv.trakt.trakt.core.summary.shows.data.ShowDetailsUpdates
 import tv.trakt.trakt.core.summary.shows.data.ShowDetailsUpdates.Source.Progress
 import tv.trakt.trakt.core.summary.shows.data.ShowDetailsUpdates.Source.Seasons
+import tv.trakt.trakt.core.summary.shows.data.ShowDetailsUpdates.Source.WatchedUntil
 import tv.trakt.trakt.core.summary.shows.features.seasons.model.EpisodeItem
 import tv.trakt.trakt.core.sync.usecases.UpdateEpisodeHistoryUseCase
 import tv.trakt.trakt.helpers.collapsing.CollapsingManager
@@ -83,6 +84,7 @@ internal class EpisodeSeasonViewModel(
         merge(
             showDetailsUpdates.observeUpdates(Progress),
             showDetailsUpdates.observeUpdates(Seasons),
+            showDetailsUpdates.observeUpdates(WatchedUntil),
             episodeDetailsUpdates.observeUpdates(Source.Progress),
             episodeDetailsUpdates.observeUpdates(Source.History),
         )

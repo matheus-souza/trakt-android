@@ -153,6 +153,7 @@ internal class EpisodeDetailsViewModel(
         merge(
             showUpdatesSource.observeUpdates(Source.Progress),
             showUpdatesSource.observeUpdates(Source.Seasons),
+            showUpdatesSource.observeUpdates(Source.WatchedUntil),
             episodeUpdatesSource.observeUpdates(Season),
             episodeUpdatesSource.observeUpdates(History),
         )

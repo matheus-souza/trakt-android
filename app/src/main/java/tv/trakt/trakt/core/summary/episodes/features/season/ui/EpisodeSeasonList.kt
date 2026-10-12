@@ -51,7 +51,7 @@ internal fun EpisodeSeasonList(
     onEpisodeClick: (episode: EpisodeItem) -> Unit,
     onCheckClick: (episode: EpisodeItem) -> Unit,
     onCheckLongClick: (episode: EpisodeItem) -> Unit,
-    onRemoveClick: (episode: EpisodeItem) -> Unit,
+    onMoreClick: (episode: EpisodeItem) -> Unit,
     contentPadding: PaddingValues,
     modifier: Modifier = Modifier,
 ) {
@@ -84,16 +84,17 @@ internal fun EpisodeSeasonList(
             key = { item -> item.episode.ids.trakt.value },
         ) { item ->
             val isReleased = item.episode.rememberReleased()
+            val hasMore = (item.isWatched || isReleased) && !item.isLoading
             HorizontalMediaCard(
                 title = "",
-                more = item.isWatched,
+                more = hasMore,
                 watched = item.isWatched,
                 containerImageUrl = item.episode.images?.getScreenshotUrl()
                     ?: show?.images?.getFanartUrl(),
                 onClick = { onEpisodeClick(item) },
                 onLongClick = {
-                    if (item.isWatched) {
-                        onRemoveClick(item)
+                    if (hasMore) {
+                        onMoreClick(item)
                     }
                 },
                 cardContent = {
