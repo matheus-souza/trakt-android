@@ -37,6 +37,7 @@ internal fun MovieContextSheet(
     showWhyThis: Boolean = false,
     onHideRecommendation: (Movie) -> Unit = {},
     onWhyThis: () -> Unit = {},
+    onWatchedChange: () -> Unit = {},
     onDismiss: () -> Unit,
 ) {
     val sheetScope = rememberCoroutineScope()
@@ -60,6 +61,7 @@ internal fun MovieContextSheet(
                     parameters = { parametersOf(movie) },
                 ),
                 onAddWatched = {
+                    onWatchedChange()
                     sheetScope.dismissWithMessage(
                         state = state,
                         snackHost = localSnack,
@@ -76,6 +78,7 @@ internal fun MovieContextSheet(
                     )
                 },
                 onRemoveWatched = {
+                    onWatchedChange()
                     sheetScope.dismissWithMessage(
                         state = state,
                         snackHost = localSnack,

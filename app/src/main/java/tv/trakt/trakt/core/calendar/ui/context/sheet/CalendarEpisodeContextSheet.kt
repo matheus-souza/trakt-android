@@ -36,6 +36,8 @@ internal fun CalendarEpisodeContextSheet(
     ),
     item: CalendarItem.EpisodeItem?,
     showWatchlist: Boolean = true,
+    showDrop: Boolean = false,
+    onDataChange: () -> Unit = {},
     onDismiss: () -> Unit,
 ) {
     val sheetScope = rememberCoroutineScope()
@@ -61,6 +63,7 @@ internal fun CalendarEpisodeContextSheet(
             CalendarEpisodeContextView(
                 item = item,
                 showWatchlist = showWatchlist,
+                showDrop = showDrop,
                 viewModel = koinViewModel(
                     key = viewModelKey,
                     parameters = { parametersOf(item) },
@@ -76,6 +79,10 @@ internal fun CalendarEpisodeContextSheet(
                 },
                 onRemoveWatchlist = {
                     dismissWithMessage(localRes.getString(R.string.text_info_watchlist_removed))
+                },
+                onDropped = {
+                    onDataChange()
+                    dismissWithMessage(localRes.getString(R.string.text_info_show_dropped))
                 },
                 onError = {
                     dismissWithMessage(localRes.getString(R.string.error_text_unexpected_error_short))

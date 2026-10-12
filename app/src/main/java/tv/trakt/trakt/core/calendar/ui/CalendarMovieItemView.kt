@@ -45,6 +45,7 @@ internal fun CalendarMovieItemView(
     modifier: Modifier = Modifier,
     itemLoading: Boolean = false,
     onClick: (TraktId) -> Unit = {},
+    onLongClick: (() -> Unit)? = null,
     onCheckClick: () -> Unit = {},
     onCheckLongClick: () -> Unit = {},
     onRemoveClick: () -> Unit = {},
@@ -56,9 +57,10 @@ internal fun CalendarMovieItemView(
 
     HorizontalMediaCard(
         title = "",
-        more = false,
+        more = onLongClick != null,
         containerImageUrl = item.movie.images?.getFanartUrl(),
         onClick = { onClick(item.id) },
+        onLongClick = onLongClick,
         cardContent = {
             val shadowModifier = Modifier.shadow(2.dp, RoundedCornerShape(100))
             Row(

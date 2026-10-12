@@ -74,6 +74,7 @@ import tv.trakt.trakt.common.helpers.extensions.nowLocalDay
 import tv.trakt.trakt.common.helpers.extensions.onClick
 import tv.trakt.trakt.common.model.Episode
 import tv.trakt.trakt.common.model.MediaMode
+import tv.trakt.trakt.common.model.Movie
 import tv.trakt.trakt.common.model.TraktId
 import tv.trakt.trakt.common.ui.theme.colors.Purple400
 import tv.trakt.trakt.core.calendar.model.CalendarItem
@@ -81,10 +82,12 @@ import tv.trakt.trakt.core.calendar.model.CalendarItem.EpisodeItem
 import tv.trakt.trakt.core.calendar.model.CalendarItem.MovieItem
 import tv.trakt.trakt.core.calendar.ui.CalendarEpisodeItemView
 import tv.trakt.trakt.core.calendar.ui.CalendarMovieItemView
+import tv.trakt.trakt.core.calendar.ui.context.sheet.CalendarEpisodeContextSheet
 import tv.trakt.trakt.core.calendar.ui.controls.CalendarControlsView
 import tv.trakt.trakt.core.discover.sections.releases.model.ReleaseType
 import tv.trakt.trakt.core.filters.GlobalFiltersSheet
 import tv.trakt.trakt.core.filters.navigation.GlobalFiltersOptions
+import tv.trakt.trakt.core.movies.ui.context.sheet.MovieContextSheet
 import tv.trakt.trakt.helpers.SimpleScrollConnection
 import tv.trakt.trakt.resources.R
 import tv.trakt.trakt.ui.components.MediaFilterIcon
@@ -122,6 +125,8 @@ internal fun CalendarScreen(
 
     var dateSelectionSheet by remember { mutableStateOf<CalendarItem?>(null) }
     var confirmRemoveSheet by remember { mutableStateOf<CalendarItem?>(null) }
+    var contextEpisodeSheet by remember { mutableStateOf<EpisodeItem?>(null) }
+    var contextMovieSheet by remember { mutableStateOf<Movie?>(null) }
     var filtersSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(
@@ -187,6 +192,13 @@ internal fun CalendarScreen(
             if (state.loading.isLoading) return@CalendarScreen
             dateSelectionSheet = it
         },
+        onLongClick = { item ->
+            if (state.loading.isLoading) return@CalendarScreen
+            when (item) {
+                is EpisodeItem -> contextEpisodeSheet = item
+                is MovieItem -> contextMovieSheet = item.movie
+            }
+        },
         onRemoveClick = { item ->
             if (state.loading.isLoading) return@CalendarScreen
             confirmRemoveSheet = item
@@ -246,6 +258,20 @@ internal fun CalendarScreen(
         ),
     )
 
+    CalendarEpisodeContextSheet(
+        item = contextEpisodeSheet,
+        showWatchlist = false,
+        showDrop = true,
+        onDataChange = viewModel::refreshData,
+        onDismiss = { contextEpisodeSheet = null },
+    )
+
+    MovieContextSheet(
+        movie = contextMovieSheet,
+        onWatchedChange = viewModel::refreshData,
+        onDismiss = { contextMovieSheet = null },
+    )
+
     GlobalFiltersSheet(
         active = filtersSheet,
         options = GlobalFiltersOptions(
@@ -272,6 +298,7 @@ private fun CalendarScreen(
     onEpisodeClick: (EpisodeItem) -> Unit = {},
     onCheckClick: (CalendarItem) -> Unit = {},
     onCheckLongClick: (CalendarItem) -> Unit = {},
+    onLongClick: (CalendarItem) -> Unit = {},
     onRemoveClick: (CalendarItem) -> Unit = {},
     onFiltersClick: () -> Unit = {},
     onTypeClick: (ReleaseType) -> Unit = {},
@@ -426,6 +453,7 @@ private fun CalendarScreen(
             onMovieClick = onMovieClick,
             onCheckClick = onCheckClick,
             onCheckLongClick = onCheckLongClick,
+            onLongClick = onLongClick,
             onRemoveClick = onRemoveClick,
         )
 
@@ -592,6 +620,7 @@ private fun CalendarContent(
     onMovieClick: (MovieItem) -> Unit,
     onCheckClick: (CalendarItem) -> Unit,
     onCheckLongClick: (CalendarItem) -> Unit,
+    onLongClick: (CalendarItem) -> Unit,
     onRemoveClick: (CalendarItem) -> Unit,
 ) {
     var animateIn by rememberSaveable { mutableStateOf(false) }
@@ -638,6 +667,7 @@ private fun CalendarContent(
             onEpisodeClick = onEpisodeClick,
             onCheckClick = onCheckClick,
             onCheckLongClick = onCheckLongClick,
+            onLongClick = onLongClick,
             onRemoveClick = onRemoveClick,
             modifier = modifier
                 .alpha(
@@ -670,6 +700,7 @@ private fun ContentItemsGrid(
     onEpisodeClick: (EpisodeItem) -> Unit,
     onCheckClick: (CalendarItem) -> Unit,
     onCheckLongClick: (CalendarItem) -> Unit,
+    onLongClick: (CalendarItem) -> Unit,
     onRemoveClick: (CalendarItem) -> Unit,
 ) {
     LazyVerticalGrid(
@@ -725,6 +756,7 @@ private fun ContentItemsGrid(
                             midReleases = true,
                             onClick = { onEpisodeClick(item) },
                             onShowClick = { onShowClick(item) },
+                            onLongClick = { onLongClick(item) },
                             onCheckClick = { onCheckClick(item) },
                             onCheckLongClick = { onCheckLongClick(item) },
                             onRemoveClick = { onRemoveClick(item) },
@@ -737,6 +769,7 @@ private fun ContentItemsGrid(
                             item = item,
                             itemLoading = itemsLoading?.contains(item.id) == true,
                             onClick = { onMovieClick(item) },
+                            onLongClick = { onLongClick(item) },
                             onCheckClick = { onCheckClick(item) },
                             onCheckLongClick = { onCheckLongClick(item) },
                             onRemoveClick = { onRemoveClick(item) },

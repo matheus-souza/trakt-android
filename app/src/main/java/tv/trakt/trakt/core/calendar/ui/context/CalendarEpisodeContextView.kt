@@ -33,6 +33,7 @@ import tv.trakt.trakt.common.helpers.preview.PreviewData
 import tv.trakt.trakt.core.calendar.model.CalendarItem
 import tv.trakt.trakt.resources.R
 import tv.trakt.trakt.ui.components.buttons.GhostButton
+import tv.trakt.trakt.ui.components.confirmation.ConfirmationSheet
 import tv.trakt.trakt.ui.components.confirmation.RemoveConfirmationSheet
 import tv.trakt.trakt.ui.components.dateselection.DateSelectionSheet
 import tv.trakt.trakt.ui.theme.TraktTheme
@@ -43,10 +44,12 @@ internal fun CalendarEpisodeContextView(
     viewModel: CalendarEpisodeContextViewModel,
     modifier: Modifier = Modifier,
     showWatchlist: Boolean,
+    showDrop: Boolean,
     onAddWatched: () -> Unit,
     onRemoveWatched: () -> Unit,
     onAddWatchlist: () -> Unit,
     onRemoveWatchlist: () -> Unit,
+    onDropped: () -> Unit,
     onError: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -54,9 +57,10 @@ internal fun CalendarEpisodeContextView(
 
     var confirmRemoveWatchedSheet by remember { mutableStateOf(false) }
     var confirmRemoveWatchlistSheet by remember { mutableStateOf(false) }
+    var confirmDropSheet by remember { mutableStateOf(false) }
     var dateSheet by remember { mutableStateOf(false) }
 
-    LaunchedEffect(state.loadingWatched, state.loadingWatchlist) {
+    LaunchedEffect(state.loadingWatched, state.loadingWatchlist, state.loadingDrop) {
         when {
             state.loadingWatched == LoadingState.Done -> when {
                 !state.isWatched -> onAddWatched()
@@ -67,6 +71,8 @@ internal fun CalendarEpisodeContextView(
                 !state.isWatchlist -> onAddWatchlist()
                 else -> onRemoveWatchlist()
             }
+
+            state.loadingDrop == LoadingState.Done -> onDropped()
         }
     }
 
@@ -81,6 +87,7 @@ internal fun CalendarEpisodeContextView(
         subtitle = subtitle,
         state = state,
         showWatchlist = showWatchlist,
+        showDrop = showDrop,
         modifier = modifier,
         onWatchedClick = {
             when {
@@ -93,6 +100,9 @@ internal fun CalendarEpisodeContextView(
                 state.isWatchlist -> confirmRemoveWatchlistSheet = true
                 else -> viewModel.addToWatchlist()
             }
+        },
+        onDropClick = {
+            confirmDropSheet = true
         },
     )
 
@@ -124,6 +134,20 @@ internal fun CalendarEpisodeContextView(
         ),
     )
 
+    ConfirmationSheet(
+        active = confirmDropSheet,
+        onYes = {
+            confirmDropSheet = false
+            viewModel.dropShow()
+        },
+        onNo = { confirmDropSheet = false },
+        title = stringResource(R.string.button_text_drop_show),
+        message = stringResource(
+            R.string.warning_prompt_drop_show,
+            item.show.title,
+        ),
+    )
+
     DateSelectionSheet(
         active = dateSheet,
         title = item.show.title,
@@ -141,9 +165,11 @@ private fun CalendarEpisodeContextViewContent(
     subtitle: String,
     state: CalendarEpisodeContextState,
     showWatchlist: Boolean,
+    showDrop: Boolean,
     modifier: Modifier = Modifier,
     onWatchedClick: () -> Unit = {},
     onWatchlistClick: () -> Unit = {},
+    onDropClick: () -> Unit = {},
 ) {
     Column(
         verticalArrangement = spacedBy(0.dp),
@@ -187,8 +213,10 @@ private fun CalendarEpisodeContextViewContent(
                 item = item,
                 state = state,
                 showWatchlist = showWatchlist,
+                showDrop = showDrop,
                 onWatchedClick = onWatchedClick,
                 onWatchlistClick = onWatchlistClick,
+                onDropClick = onDropClick,
                 modifier = Modifier.padding(top = 14.dp),
             )
         }
@@ -200,17 +228,21 @@ private fun CalendarEpisodeActionButtons(
     item: CalendarItem.EpisodeItem,
     state: CalendarEpisodeContextState,
     showWatchlist: Boolean,
+    showDrop: Boolean,
     modifier: Modifier = Modifier,
     onWatchedClick: () -> Unit,
     onWatchlistClick: () -> Unit,
+    onDropClick: () -> Unit,
 ) {
     val isReleased = item.episodes.last().rememberReleased()
 
     val isLoadingOrDone =
         state.loadingWatched.isLoading ||
             state.loadingWatchlist.isLoading ||
+            state.loadingDrop.isLoading ||
             state.loadingWatched.isDone ||
-            state.loadingWatchlist.isDone
+            state.loadingWatchlist.isDone ||
+            state.loadingDrop.isDone
 
     Column(
         verticalArrangement = spacedBy(TraktTheme.spacing.contextItemsSpace),
@@ -252,6 +284,22 @@ private fun CalendarEpisodeActionButtons(
                     else -> painterResource(R.drawable.ic_bookmark_off)
                 },
                 iconSize = 25.dp,
+                iconSpace = 16.dp,
+                modifier = Modifier
+                    .graphicsLayer {
+                        translationX = -8.dp.toPx()
+                    },
+            )
+        }
+
+        if (showDrop) {
+            GhostButton(
+                enabled = !isLoadingOrDone,
+                loading = state.loadingDrop.isLoading || state.loadingDrop.isDone,
+                text = stringResource(R.string.button_text_drop_show),
+                onClick = onDropClick,
+                icon = painterResource(R.drawable.ic_drop),
+                iconSize = 21.dp,
                 iconSpace = 16.dp,
                 modifier = Modifier
                     .graphicsLayer {
@@ -301,6 +349,7 @@ private fun Preview() {
                 user = PreviewData.user1,
             ),
             showWatchlist = true,
+            showDrop = false,
         )
     }
 }
@@ -327,6 +376,7 @@ private fun PreviewWatched() {
                 user = PreviewData.user1,
             ),
             showWatchlist = false,
+            showDrop = true,
         )
     }
 }

@@ -49,6 +49,7 @@ internal fun CalendarEpisodeItemView(
     midReleases: Boolean = false,
     onClick: () -> Unit,
     onShowClick: () -> Unit,
+    onLongClick: (() -> Unit)? = null,
     onCheckClick: () -> Unit = {},
     onCheckLongClick: () -> Unit = {},
     onRemoveClick: () -> Unit = {},
@@ -56,8 +57,9 @@ internal fun CalendarEpisodeItemView(
     HorizontalMediaCard(
         modifier = modifier,
         title = "",
-        more = false,
+        more = onLongClick != null,
         onClick = onClick,
+        onLongClick = onLongClick,
         containerImageUrl =
             item.show.images?.getFanartUrl()
                 ?: item.episode.images?.getScreenshotUrl(),

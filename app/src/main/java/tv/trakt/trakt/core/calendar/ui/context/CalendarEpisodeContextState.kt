@@ -11,6 +11,7 @@ internal data class CalendarEpisodeContextState(
     val isWatchlist: Boolean = false,
     val loadingWatched: LoadingState = Idle,
     val loadingWatchlist: LoadingState = Idle,
+    val loadingDrop: LoadingState = Idle,
     val user: User? = null,
     val error: Exception? = null,
 )

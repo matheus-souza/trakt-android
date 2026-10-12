@@ -13,8 +13,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.koin.android.ext.koin.androidApplication
 import org.koin.core.module.dsl.factoryOf
-import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.module.dsl.viewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import tv.trakt.trakt.core.calendar.CalendarViewModel
@@ -47,6 +47,10 @@ internal val calendarModule = module {
             item = item,
             updateHistoryUseCase = get(),
             updateWatchlistUseCase = get(),
+            updateShowHistoryUseCase = get(),
+            upNextLocalDataSource = get(),
+            upcomingLocalDataSource = get(),
+            upNextUpdates = get(),
             userProgressLocalSource = get(),
             userWatchlistLocalSource = get(),
             userWatchlistMinLocalSource = get(),

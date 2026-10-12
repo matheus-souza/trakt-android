@@ -197,6 +197,10 @@ internal class CalendarViewModel(
         }
     }
 
+    fun refreshData() {
+        loadData()
+    }
+
     fun loadTodayData() {
         val today = LocalDate.now().with(MONDAY)
         if (selectedStartDayState.value != today) {

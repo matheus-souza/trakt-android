@@ -34,9 +34,13 @@ import tv.trakt.trakt.common.helpers.extensions.rethrowCancellation
 import tv.trakt.trakt.common.model.DateSelectionResult
 import tv.trakt.trakt.common.model.User
 import tv.trakt.trakt.core.calendar.model.CalendarItem
+import tv.trakt.trakt.core.home.sections.upcoming.data.local.HomeUpcomingLocalDataSource
+import tv.trakt.trakt.core.home.sections.upnext.data.local.HomeUpNextLocalDataSource
+import tv.trakt.trakt.core.home.sections.upnext.features.all.data.local.UpNextUpdates
 import tv.trakt.trakt.core.summary.episodes.data.EpisodeDetailsUpdates
 import tv.trakt.trakt.core.summary.episodes.data.EpisodeDetailsUpdates.Source.Progress
 import tv.trakt.trakt.core.sync.usecases.UpdateEpisodeHistoryUseCase
+import tv.trakt.trakt.core.sync.usecases.UpdateShowHistoryUseCase
 import tv.trakt.trakt.core.sync.usecases.UpdateShowWatchlistUseCase
 
 @Suppress("UNCHECKED_CAST")
@@ -44,6 +48,10 @@ internal class CalendarEpisodeContextViewModel(
     private val item: CalendarItem.EpisodeItem,
     private val updateHistoryUseCase: UpdateEpisodeHistoryUseCase,
     private val updateWatchlistUseCase: UpdateShowWatchlistUseCase,
+    private val updateShowHistoryUseCase: UpdateShowHistoryUseCase,
+    private val upNextLocalDataSource: HomeUpNextLocalDataSource,
+    private val upcomingLocalDataSource: HomeUpcomingLocalDataSource,
+    private val upNextUpdates: UpNextUpdates,
     private val userProgressLocalSource: UserProgressLocalDataSource,
     private val userWatchlistLocalSource: UserWatchlistLocalDataSource,
     private val userWatchlistMinLocalSource: UserWatchlistMinimalLocalDataSource,
@@ -61,6 +69,7 @@ internal class CalendarEpisodeContextViewModel(
     private val isWatchlistState = MutableStateFlow(initialState.isWatchlist)
     private val loadingWatchedState = MutableStateFlow(initialState.loadingWatched)
     private val loadingWatchlistState = MutableStateFlow(initialState.loadingWatchlist)
+    private val loadingDropState = MutableStateFlow(initialState.loadingDrop)
     private val userState = MutableStateFlow(initialState.user)
     private val errorState = MutableStateFlow(initialState.error)
 
@@ -269,14 +278,46 @@ internal class CalendarEpisodeContextViewModel(
         }
     }
 
+    fun dropShow() {
+        if (isLoading()) {
+            return
+        }
+
+        viewModelScope.launch {
+            clear()
+            try {
+                loadingDropState.update { Loading }
+
+                updateShowHistoryUseCase.dropShow(showId)
+                upNextLocalDataSource.removeShowItems(ids = listOf(showId))
+                upcomingLocalDataSource.removeShowItems(
+                    showIds = listOf(showId),
+                    notify = true,
+                )
+                upNextUpdates.notifyUpdate(UpNextUpdates.Source.Default)
+                loadProgressUseCase.loadShowsProgress()
+            } catch (error: Exception) {
+                error.rethrowCancellation {
+                    errorState.update { error }
+                    Timber.recordError(error)
+                }
+            } finally {
+                loadingDropState.update { Done }
+            }
+        }
+    }
+
     private fun clear() {
         loadingWatchedState.update { Idle }
         loadingWatchlistState.update { Idle }
+        loadingDropState.update { Idle }
         errorState.update { null }
     }
 
     private fun isLoading(): Boolean {
-        return loadingWatchedState.value.isLoading || loadingWatchlistState.value.isLoading
+        return loadingWatchedState.value.isLoading ||
+            loadingWatchlistState.value.isLoading ||
+            loadingDropState.value.isLoading
     }
 
     val state = combine(
@@ -284,6 +325,7 @@ internal class CalendarEpisodeContextViewModel(
         isWatchlistState,
         loadingWatchedState,
         loadingWatchlistState,
+        loadingDropState,
         userState,
         errorState,
     ) { state ->
@@ -292,8 +334,9 @@ internal class CalendarEpisodeContextViewModel(
             isWatchlist = state[1] as Boolean,
             loadingWatched = state[2] as LoadingState,
             loadingWatchlist = state[3] as LoadingState,
-            user = state[4] as User?,
-            error = state[5] as Exception?,
+            loadingDrop = state[4] as LoadingState,
+            user = state[5] as User?,
+            error = state[6] as Exception?,
         )
     }.stateIn(
         scope = viewModelScope,

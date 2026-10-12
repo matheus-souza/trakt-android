@@ -196,6 +196,10 @@ internal class AllReleasesViewModel(
         }
     }
 
+    fun refreshData() {
+        loadData()
+    }
+
     fun loadTodayData() {
         val today = nowLocalDay().with(MONDAY)
         if (selectedStartDayState.value != today) {
