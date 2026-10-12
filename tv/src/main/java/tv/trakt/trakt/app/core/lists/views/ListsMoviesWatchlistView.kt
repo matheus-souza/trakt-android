@@ -8,8 +8,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
@@ -25,6 +31,7 @@ import tv.trakt.trakt.app.common.ui.mediacards.VerticalViewAllCard
 import tv.trakt.trakt.app.core.lists.ListsConfig.LISTS_SECTION_LIMIT
 import tv.trakt.trakt.app.core.lists.ListsContentLoading
 import tv.trakt.trakt.app.helpers.extensions.emptyFocusListVerticalItems
+import tv.trakt.trakt.app.helpers.extensions.requestSafeFocus
 import tv.trakt.trakt.app.ui.theme.TraktTheme
 import tv.trakt.trakt.common.helpers.extensions.rememberDurationFormat
 import tv.trakt.trakt.common.model.Movie
@@ -101,8 +108,22 @@ private fun ContentList(
     onViewAllClick: () -> Unit,
     contentPadding: PaddingValues,
 ) {
+    val restoreItem = remember { FocusRequester() }
+    var focusedId by remember { mutableStateOf<Int?>(null) }
+    val restoreId = focusedId ?: listItems().firstOrNull()?.ids?.trakt?.value
+
     PositionFocusLazyRow(
         contentPadding = contentPadding,
+        modifier = Modifier
+            // Entering from the wider personal list cards below would otherwise skip ahead.
+            .focusProperties {
+                onEnter = {
+                    if (requestedFocusDirection == FocusDirection.Up) {
+                        restoreItem.requestSafeFocus()
+                    }
+                }
+            }
+            .focusGroup(),
     ) {
         items(
             items = listItems(),
@@ -127,8 +148,12 @@ private fun ContentList(
                     }
                 },
                 modifier = Modifier
+                    .then(
+                        if (item.ids.trakt.value == restoreId) Modifier.focusRequester(restoreItem) else Modifier,
+                    )
                     .onFocusChanged {
                         if (it.isFocused) {
+                            focusedId = item.ids.trakt.value
                             onFocused(item)
                         }
                     },
