@@ -159,7 +159,7 @@ internal fun DetailsHeader(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    top = 14.dp,
+                    top = 15.dp,
                     start = TraktTheme.spacing.mainPageHorizontalSpace,
                     end = TraktTheme.spacing.mainPageHorizontalSpace,
                 ),
@@ -187,15 +187,18 @@ internal fun DetailsHeader(
                     !translation.isNullOrBlank() -> translation
                     else -> title
                 }
+                val titleSize = TraktTheme.typography.heading3.copy(
+                    fontSize = 22.sp,
+                )
                 Text(
                     text = displayedTitle,
                     textAlign = TextAlign.Center,
                     color = TraktTheme.colors.textPrimary,
-                    style = TraktTheme.typography.heading3,
+                    style = titleSize,
                     maxLines = 1,
                     overflow = Ellipsis,
                     autoSize = TextAutoSize.StepBased(
-                        maxFontSize = TraktTheme.typography.heading3.fontSize,
+                        maxFontSize = titleSize.fontSize,
                         minFontSize = 16.sp,
                         stepSize = 2.sp,
                     ),

@@ -62,7 +62,7 @@ internal fun DetailsHeader(
                 horizontalArrangement = spacedBy(4.dp),
                 modifier = Modifier.padding(
                     top = 4.dp,
-                    bottom = 3.dp,
+                    bottom = 4.dp,
                 ),
             ) {
                 val font = TraktTheme.typography.heading6.copy(fontSize = 13.sp)
