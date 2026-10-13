@@ -84,6 +84,7 @@ import tv.trakt.trakt.core.billing.navigation.navigateToBilling
 import tv.trakt.trakt.core.checkin.model.CheckInState.ActiveEpisode
 import tv.trakt.trakt.core.checkin.model.CheckInState.ActiveMovie
 import tv.trakt.trakt.core.comments.features.translation.download.CommentTranslationDownloadSheet
+import tv.trakt.trakt.core.discover.navigation.DiscoverDestination
 import tv.trakt.trakt.core.home.navigation.HomeDestination
 import tv.trakt.trakt.core.lists.navigation.ListsDestination
 import tv.trakt.trakt.core.lists.sections.watchlist.features.all.navigation.navigateToWatchlist
@@ -94,6 +95,7 @@ import tv.trakt.trakt.core.main.navigation.navigateToMainDestination
 import tv.trakt.trakt.core.main.ui.checkin.MainCheckInView
 import tv.trakt.trakt.core.main.ui.menubar.TraktMenuBar
 import tv.trakt.trakt.core.main.ui.rateprompt.MainRatePromptView
+import tv.trakt.trakt.core.main.ui.seasonal.SeasonalSplashView
 import tv.trakt.trakt.core.main.ui.yir.MainYearInReviewView
 import tv.trakt.trakt.core.profile.navigation.ProfileDestination
 import tv.trakt.trakt.core.ratings.data.work.PostRatingException
@@ -107,6 +109,7 @@ import tv.trakt.trakt.core.welcome.onboarding.OnboardingScreen
 import tv.trakt.trakt.resources.R
 import tv.trakt.trakt.ui.snackbar.MainSnackbarHost
 import tv.trakt.trakt.ui.theme.TraktTheme
+import tv.trakt.trakt.ui.theme.WithoutSeasonalTheme
 
 private const val IN_APP_UPDATE_REQUEST_CODE = 4001
 private const val IN_APP_UPDATE_STALENESS_DAYS = 7
@@ -250,6 +253,13 @@ internal fun MainScreen(
         onDismissCheckIn = viewModel::dismissCheckIn,
     )
 
+    SeasonalSplashView(
+        enabled = state.user != null && !state.welcome.isActive && !yearInReviewVisible,
+        onDismissed = {
+            navController.navigateToMainDestination(DiscoverDestination)
+        },
+    )
+
     MainYearInReviewView(
         visible = yearInReviewVisible,
         url = state.yearInReviewUrl,
@@ -309,15 +319,19 @@ private fun MainScreenContent(
         ) { targetState ->
             when {
                 targetState.welcome -> {
-                    WelcomeScreen(
-                        onDismiss = onDismissWelcome,
-                    )
+                    WithoutSeasonalTheme {
+                        WelcomeScreen(
+                            onDismiss = onDismissWelcome,
+                        )
+                    }
                 }
 
                 targetState.onboarding -> {
-                    OnboardingScreen(
-                        onLogin = startAuthorization,
-                    )
+                    WithoutSeasonalTheme {
+                        OnboardingScreen(
+                            onLogin = startAuthorization,
+                        )
+                    }
                 }
 
                 else -> {

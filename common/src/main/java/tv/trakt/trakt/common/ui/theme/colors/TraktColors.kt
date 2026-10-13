@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.dp
 data class TraktColors(
     val isLight: Boolean = false,
     val accent: Color = Color.Unspecified,
+    val accentPalette: AccentPalette = PurplePalette,
     val backgroundPrimary: Color = Color.Unspecified,
     val backgroundImageAlpha: Float = Float.NaN,
     val textPrimary: Color = Color.Unspecified,
@@ -62,6 +63,17 @@ data class TraktColors(
     val streakLevel2: Color = Color.Unspecified,
     val streakLevel3: Color = Color.Unspecified,
     val streakLevel4: Color = Color.Unspecified,
+    val streakAccent: Color = Color.Unspecified,
+    val streakValue: Color = Color.Unspecified,
+    // Profile stats
+    val screenTimeHigh: Color = Color.Unspecified,
+    val screenTimeMedium: Color = Color.Unspecified,
+    val screenTimeLow: Color = Color.Unspecified,
+    val statsCardGradient: Color = Color.Unspecified,
+    // Settings
+    val settingsHeader: Color = Color.Unspecified,
+    val settingsLinkedStatus: Color = Color.Unspecified,
+    val rateBannerContainer: Color = Color.Unspecified,
     // Nav
     val navigationHeaderContainer: Color = Color.Unspecified,
     val navigationContainer: Color = Color.Unspecified,
