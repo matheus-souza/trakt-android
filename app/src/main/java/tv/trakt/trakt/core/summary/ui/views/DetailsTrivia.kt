@@ -33,14 +33,13 @@ import androidx.compose.ui.graphics.RadialGradientShader
 import androidx.compose.ui.graphics.Shader
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight.Companion.W600
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.text.HtmlCompat
-import androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
 import coil3.ColorImage
 import coil3.annotation.ExperimentalCoilApi
 import coil3.compose.AsyncImagePreviewHandler
@@ -48,7 +47,9 @@ import coil3.compose.LocalAsyncImagePreviewHandler
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import tv.trakt.trakt.common.helpers.extensions.onClick
-import tv.trakt.trakt.common.helpers.extensions.toAnnotatedString
+import tv.trakt.trakt.common.helpers.extensions.toMarkdownText
+import tv.trakt.trakt.common.model.SlugId
+import tv.trakt.trakt.core.applinks.rememberAppLinkUriHandler
 import tv.trakt.trakt.helpers.extensions.TraktThemeLightDark
 import tv.trakt.trakt.resources.R
 import tv.trakt.trakt.ui.components.vip.VipChip
@@ -61,7 +62,9 @@ internal fun DetailsTrivia(
     vip: Boolean,
     modifier: Modifier = Modifier,
     onVipClick: () -> Unit = {},
+    onPersonLinkClick: (SlugId) -> Unit = {},
 ) {
+    val personLinkUriHandler = rememberAppLinkUriHandler(onPersonClick = onPersonLinkClick)
     val containerColor = TraktTheme.colors.triviaContainer
     val containerColor2 = TraktTheme.colors.dialogContainer
     val radialGradient = remember {
@@ -95,6 +98,7 @@ internal fun DetailsTrivia(
             )
             .padding(20.dp),
     ) {
+        val linkColor = TraktTheme.colors.triviaText
         items.forEach { item ->
             Row(
                 horizontalArrangement = spacedBy(8.dp, Alignment.Start),
@@ -106,15 +110,13 @@ internal fun DetailsTrivia(
                     style = TraktTheme.typography.paragraphSmall,
                 )
 
-                Text(
-                    text = remember(item) {
-                        HtmlCompat
-                            .fromHtml(item, FROM_HTML_MODE_LEGACY)
-                            .toAnnotatedString()
-                    },
-                    color = TraktTheme.colors.triviaText,
-                    style = TraktTheme.typography.paragraphSmall,
-                )
+                CompositionLocalProvider(LocalUriHandler provides personLinkUriHandler) {
+                    Text(
+                        text = remember(item, linkColor) { item.toMarkdownText(linkColor) },
+                        color = TraktTheme.colors.triviaText,
+                        style = TraktTheme.typography.paragraphSmall,
+                    )
+                }
             }
         }
 
