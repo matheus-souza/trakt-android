@@ -62,6 +62,8 @@ import tv.trakt.trakt.core.profile.sections.progress.all.navigation.allProgressS
 import tv.trakt.trakt.core.profile.sections.progress.all.navigation.navigateToProgress
 import tv.trakt.trakt.core.profile.sections.social.all.navigation.allProfileSocialScreen
 import tv.trakt.trakt.core.profile.sections.social.all.navigation.navigateToProfileSocial
+import tv.trakt.trakt.core.search.features.game.navigation.gameScreen
+import tv.trakt.trakt.core.search.features.game.navigation.navigateToGame
 import tv.trakt.trakt.core.search.model.SearchInput
 import tv.trakt.trakt.core.search.navigation.navigateToSearch
 import tv.trakt.trakt.core.search.navigation.searchScreen
@@ -641,6 +643,11 @@ internal fun NavGraphBuilder.searchScreens(
                     currentUserId = userId,
                 )
             },
+            onNavigateToGame = { navigateToGame() },
+        )
+
+        gameScreen(
+            onNavigateBack = { popBackStack() },
         )
     }
 }
