@@ -76315,7 +76315,9 @@
                     }
                   }
                 },
-                "additionalProperties": true
+                "required": [
+                  "rank"
+                ]
               }
             }
           }
@@ -76336,9 +76338,28 @@
                       "items": {
                         "type": "integer"
                       }
+                    },
+                    "list": {
+                      "type": "object",
+                      "properties": {
+                        "updated_at": {
+                          "type": "string"
+                        },
+                        "item_count": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "updated_at",
+                        "item_count"
+                      ]
                     }
                   },
-                  "additionalProperties": true
+                  "required": [
+                    "updated",
+                    "skipped_ids",
+                    "list"
+                  ]
                 }
               }
             }
@@ -79875,7 +79896,9 @@
                     }
                   }
                 },
-                "additionalProperties": true
+                "required": [
+                  "rank"
+                ]
               }
             }
           }
@@ -79896,9 +79919,28 @@
                       "items": {
                         "type": "integer"
                       }
+                    },
+                    "list": {
+                      "type": "object",
+                      "properties": {
+                        "updated_at": {
+                          "type": "string"
+                        },
+                        "item_count": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "updated_at",
+                        "item_count"
+                      ]
                     }
                   },
-                  "additionalProperties": true
+                  "required": [
+                    "updated",
+                    "skipped_ids",
+                    "list"
+                  ]
                 }
               }
             }
@@ -117999,7 +118041,7 @@
     },
     "/people/{id}/": {
       "get": {
-        "description": "#### ✨ Extended Info\nReturns a single person's details.\n\n#### Gender\nIf available, the `gender` property will be set to `male`, `female`, or `non_binary`.\n\n#### Known For Department\nIf available, the `known_for_department` property will be set to `production`, `art`, `crew`, `costume & make-up`, `directing`, `writing`, `sound`, `camera`, `visual effects`, `lighting`, or `editing`. Many people have credits across departments, `known_for` allows you to select their default credits more accurately.",
+        "description": "#### ✨ Extended Info\nReturns a single person's details.\n\n#### Gender\nIf available, the `gender` property will be set to `male`, `female`, or `non_binary`.\n\n#### Known For Department\nIf available, the `known_for_department` property will be set to `production`, `art`, `crew`, `costume & make-up`, `directing`, `writing`, `sound`, `camera`, `visual effects`, `lighting`, or `editing`. Many people have credits across departments, `known_for` allows you to select their default credits more accurately.\n\n#### Biography\nThe `biography` is plain text. Request extended `markdown` to get markdown links to the movies and shows it mentions.",
         "summary": "Get a single person",
         "tags": [
           "people"
