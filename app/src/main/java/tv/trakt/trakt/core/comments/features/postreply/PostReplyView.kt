@@ -144,6 +144,7 @@ private fun ViewContent(
         Row(
             verticalAlignment = Alignment.Bottom,
             modifier = Modifier
+                .weight(1F, fill = false)
                 .fillMaxWidth()
                 .animateContentSize(),
         ) {

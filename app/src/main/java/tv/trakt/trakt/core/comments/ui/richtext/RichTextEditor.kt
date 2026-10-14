@@ -48,7 +48,7 @@ internal fun RichTextEditor(
     enabled: Boolean = true,
     borderColor: Color = TraktTheme.colors.accent,
     minLines: Int = 6,
-    maxLines: Int = 20,
+    maxLines: Int = 15,
     toolbarTrailing: @Composable () -> Unit = {},
 ) {
     val suggestions = remember(mentions, state.mentionQuery) {
@@ -78,6 +78,7 @@ internal fun RichTextEditor(
             enabled = enabled,
             minLines = minLines,
             maxLines = maxLines,
+            modifier = Modifier.weight(1F, fill = false),
         )
 
         if (suggestions.isNotEmpty()) {
@@ -107,6 +108,7 @@ private fun EditorField(
     enabled: Boolean,
     minLines: Int,
     maxLines: Int,
+    modifier: Modifier = Modifier,
 ) {
     val colors = TraktTheme.colors
     val textStyle = TraktTheme.typography.paragraph
@@ -162,7 +164,7 @@ private fun EditorField(
             view.alpha = if (enabled) 1F else DISABLED_ALPHA
         },
         onRelease = { view -> state.detach(view) },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     )
 }
 
