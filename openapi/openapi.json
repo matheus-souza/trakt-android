@@ -91933,7 +91933,7 @@
     },
     "/movies/{id}/people": {
       "get": {
-        "description": "#### ✨ Extended Info\nReturns all `cast` and `crew` for a movie. Each `cast` member will have a `characters` array and a standard `person` object.\n\nThe `crew` object will be broken up by department into `production`, `art`, `crew`, `costume & make-up`, `directing`, `writing`, `sound`, `camera`, `visual effects`, `lighting`, and `editing` (if there are people for those crew positions). Each of those members will have a `jobs` array and a standard `person` object.",
+        "description": "#### ✨ Extended Info\nReturns all `cast` and `crew` for a movie. Each `cast` member will have a `characters` array and a standard `person` object.\n\nThe `crew` object will be broken up by department into `production`, `art`, `crew`, `costume & make-up`, `directing`, `writing`, `sound`, `camera`, `visual effects`, `lighting`, and `editing` (if there are people for those crew positions). Each of those members will have a `jobs` array and a standard `person` object.\n\n#### Markdown\nIf you add `?extended=markdown` to the URL, person biographies include links to the movies and shows they mention. Without it the biography is plain text.",
         "summary": "Get all people for a movie",
         "tags": [
           "movies"
@@ -92030,6 +92030,10 @@
                                 "nullable": true
                               },
                               "biography": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "summary": {
                                 "type": "string",
                                 "nullable": true
                               },
@@ -92195,6 +92199,10 @@
                                 "type": "string",
                                 "nullable": true
                               },
+                              "summary": {
+                                "type": "string",
+                                "nullable": true
+                              },
                               "birthday": {
                                 "type": "string",
                                 "nullable": true
@@ -92352,6 +92360,10 @@
                                   "nullable": true
                                 },
                                 "biography": {
+                                  "type": "string",
+                                  "nullable": true
+                                },
+                                "summary": {
                                   "type": "string",
                                   "nullable": true
                                 },
@@ -101686,7 +101698,7 @@
     },
     "/shows/{id}/people": {
       "get": {
-        "description": "#### ✨ Extended Info\nReturns all `cast` and `crew` for a show, including the `episode_count` for which they appears. Each `cast` member will have a `characters` array and a standard `person` object.\n\nThe `crew` object will be broken up by department into `production`, `art`, `crew`, `costume & make-up`, `directing`, `writing`, `sound`, `camera`, `visual effects`, `lighting`, `editing`, and `created  by` (if there are people for those crew positions). Each of those members will have a `jobs` array and a standard `person` object.\n\n#### Guest Stars\nIf you add `?extended=guest_stars` to the URL, it will return all guest stars that appeared in at least 1 episode of the show.\n\n> ### Note\n> _This returns a lot of data, so please only use this extended parameter if you actually need it!_",
+        "description": "#### ✨ Extended Info\nReturns all `cast` and `crew` for a show, including the `episode_count` for which they appears. Each `cast` member will have a `characters` array and a standard `person` object.\n\nThe `crew` object will be broken up by department into `production`, `art`, `crew`, `costume & make-up`, `directing`, `writing`, `sound`, `camera`, `visual effects`, `lighting`, `editing`, and `created  by` (if there are people for those crew positions). Each of those members will have a `jobs` array and a standard `person` object.\n\n#### Guest Stars\nIf you add `?extended=guest_stars` to the URL, it will return all guest stars that appeared in at least 1 episode of the show.\n\n> ### Note\n> _This returns a lot of data, so please only use this extended parameter if you actually need it!_\n\n#### Markdown\nIf you add `?extended=markdown` to the URL, person biographies include links to the movies and shows they mention. Without it the biography is plain text.",
         "summary": "Get all people for a show",
         "tags": [
           "shows"
@@ -101783,6 +101795,10 @@
                                 "nullable": true
                               },
                               "biography": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "summary": {
                                 "type": "string",
                                 "nullable": true
                               },
@@ -101948,6 +101964,10 @@
                                 "type": "string",
                                 "nullable": true
                               },
+                              "summary": {
+                                "type": "string",
+                                "nullable": true
+                              },
                               "birthday": {
                                 "type": "string",
                                 "nullable": true
@@ -102105,6 +102125,10 @@
                                   "nullable": true
                                 },
                                 "biography": {
+                                  "type": "string",
+                                  "nullable": true
+                                },
+                                "summary": {
                                   "type": "string",
                                   "nullable": true
                                 },
@@ -103508,7 +103532,7 @@
     },
     "/shows/{id}/seasons/{season}/people": {
       "get": {
-        "description": "Returns all cast and crew for a season. Each cast member will have a characters array and a standard person object.",
+        "description": "Returns all cast and crew for a season. Each cast member will have a characters array and a standard person object. Add `?extended=markdown` to include links to the movies and shows in person biographies; without it the biography is plain text.",
         "summary": "Get all people for a season",
         "tags": [
           "shows",
@@ -103616,6 +103640,10 @@
                                 "nullable": true
                               },
                               "biography": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "summary": {
                                 "type": "string",
                                 "nullable": true
                               },
@@ -103781,6 +103809,10 @@
                                 "type": "string",
                                 "nullable": true
                               },
+                              "summary": {
+                                "type": "string",
+                                "nullable": true
+                              },
                               "birthday": {
                                 "type": "string",
                                 "nullable": true
@@ -103938,6 +103970,10 @@
                                   "nullable": true
                                 },
                                 "biography": {
+                                  "type": "string",
+                                  "nullable": true
+                                },
+                                "summary": {
                                   "type": "string",
                                   "nullable": true
                                 },
@@ -107160,7 +107196,7 @@
     },
     "/shows/{id}/seasons/{season}/episodes/{episode}/people": {
       "get": {
-        "description": "#### ✨ Extended Info\nReturns all `cast` and `crew` for an episode. Each `cast` member will have a `characters` array and a standard `person` object.\n\nThe `crew` object will be broken up by department into `production`, `art`, `crew`, `costume & make-up`, `directing`, `writing`, `sound`, `camera`, `visual effects`, `lighting`, and `editing` (if there are people for those crew positions). Each of those members will have a `jobs` array and a standard `person` object.\n\n#### Guest Stars\nIf you add `?extended=guest_stars` to the URL, it will return all guest stars that appeared in the episode.\n\n> ### Note\n> _This returns a lot of data, so please only use this extended parameter if you actually need it!_",
+        "description": "#### ✨ Extended Info\nReturns all `cast` and `crew` for an episode. Each `cast` member will have a `characters` array and a standard `person` object.\n\nThe `crew` object will be broken up by department into `production`, `art`, `crew`, `costume & make-up`, `directing`, `writing`, `sound`, `camera`, `visual effects`, `lighting`, and `editing` (if there are people for those crew positions). Each of those members will have a `jobs` array and a standard `person` object.\n\n#### Guest Stars\nIf you add `?extended=guest_stars` to the URL, it will return all guest stars that appeared in the episode.\n\n> ### Note\n> _This returns a lot of data, so please only use this extended parameter if you actually need it!_\n\n#### Markdown\nIf you add `?extended=markdown` to the URL, person biographies include links to the movies and shows they mention. Without it the biography is plain text.",
         "summary": "Get all people for an episode",
         "tags": [
           "shows",
@@ -107278,6 +107314,10 @@
                                 "nullable": true
                               },
                               "biography": {
+                                "type": "string",
+                                "nullable": true
+                              },
+                              "summary": {
                                 "type": "string",
                                 "nullable": true
                               },
@@ -107443,6 +107483,10 @@
                                 "type": "string",
                                 "nullable": true
                               },
+                              "summary": {
+                                "type": "string",
+                                "nullable": true
+                              },
                               "birthday": {
                                 "type": "string",
                                 "nullable": true
@@ -107600,6 +107644,10 @@
                                   "nullable": true
                                 },
                                 "biography": {
+                                  "type": "string",
+                                  "nullable": true
+                                },
+                                "summary": {
                                   "type": "string",
                                   "nullable": true
                                 },
@@ -113515,7 +113563,7 @@
     },
     "/search/{type}": {
       "get": {
-        "description": "#### 📄 Pagination ✨ Extended Info\n\nSearch all text fields that a media object contains (i.e. title, overview, etc). Results are ordered by the most relevant score. Specify the `type` of results by sending a single value or a comma delimited string for multiple types.\n\n#### Special Characters\n\nOur search engine gives the following characters special meaning when they appear in a query:\n\n`+ - && || ! ( ) { } [ ] ^ \" ~ * ? : /`\n\nTo interpret any of these characters literally (and not as a special character), precede the character with a backslash `\\` character.\n\n#### Search Fields\n\nBy default, certain text fields are used to search for the `query`. You can optionally specify the `fields` parameter with a single value or comma delimited string for multiple fields. Each `type` has specific `fields` that can be specified. This can be useful if you want to support more strict searches (i.e. title only).\n\n| Type | Field | Default |\n|---|---|---|\n| `movie` | `title` | &#10003; |\n|  | `original_title` | &#10003; |\n|  | `translations` | &#10003; |\n|  | `aliases` | &#10003; |\n|  | `tagline` | |\n|  | `overview` | |\n|  | `people` | |\n| `show` | `title` | &#10003; |\n|  | `original_title` | &#10003; |\n|  | `translations` | &#10003; |\n|  | `aliases` | &#10003; |\n|  | `overview` | |\n|  | `people` | |\n| `episode` | `title` | &#10003; |\n|  | `show_title` | &#10003; |\n|  | `overview` | |\n| `person` | `name` | &#10003; |\n|  | `biography` | |\n| `list` | `name` | &#10003; |\n|  | `description` | &#10003; |",
+        "description": "#### 📄 Pagination ✨ Extended Info\n\nSearch all text fields that a media object contains (i.e. title, overview, etc). Results are ordered by the most relevant score. Specify the `type` of results by sending a single value or a comma delimited string for multiple types.\n\n#### Special Characters\n\nOur search engine gives the following characters special meaning when they appear in a query:\n\n`+ - && || ! ( ) { } [ ] ^ \" ~ * ? : /`\n\nTo interpret any of these characters literally (and not as a special character), precede the character with a backslash `\\` character.\n\n#### Markdown\n\nIf you add `?extended=markdown` to a `person` search, the `biography` includes links to the movies and shows it mentions. Without it the biography is plain text.\n\n#### Search Fields\n\nBy default, certain text fields are used to search for the `query`. You can optionally specify the `fields` parameter with a single value or comma delimited string for multiple fields. Each `type` has specific `fields` that can be specified. This can be useful if you want to support more strict searches (i.e. title only).\n\n| Type | Field | Default |\n|---|---|---|\n| `movie` | `title` | &#10003; |\n|  | `original_title` | &#10003; |\n|  | `translations` | &#10003; |\n|  | `aliases` | &#10003; |\n|  | `tagline` | |\n|  | `overview` | |\n|  | `people` | |\n| `show` | `title` | &#10003; |\n|  | `original_title` | &#10003; |\n|  | `translations` | &#10003; |\n|  | `aliases` | &#10003; |\n|  | `overview` | |\n|  | `people` | |\n| `episode` | `title` | &#10003; |\n|  | `show_title` | &#10003; |\n|  | `overview` | |\n| `person` | `name` | &#10003; |\n|  | `biography` | |\n| `list` | `name` | &#10003; |\n|  | `description` | &#10003; |",
         "summary": "Get text query results",
         "tags": [
           "search"
@@ -114302,6 +114350,10 @@
                             "nullable": true
                           },
                           "biography": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "summary": {
                             "type": "string",
                             "nullable": true
                           },
@@ -115440,6 +115492,10 @@
                             "nullable": true
                           },
                           "biography": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "summary": {
                             "type": "string",
                             "nullable": true
                           },
@@ -116585,6 +116641,10 @@
                             "type": "string",
                             "nullable": true
                           },
+                          "summary": {
+                            "type": "string",
+                            "nullable": true
+                          },
                           "birthday": {
                             "type": "string",
                             "nullable": true
@@ -117625,6 +117685,10 @@
                                 "type": "string",
                                 "nullable": true
                               },
+                              "summary": {
+                                "type": "string",
+                                "nullable": true
+                              },
                               "birthday": {
                                 "type": "string",
                                 "nullable": true
@@ -117892,6 +117956,10 @@
                             "type": "string",
                             "nullable": true
                           },
+                          "summary": {
+                            "type": "string",
+                            "nullable": true
+                          },
                           "birthday": {
                             "type": "string",
                             "nullable": true
@@ -118126,6 +118194,10 @@
                       "nullable": true
                     },
                     "biography": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "summary": {
                       "type": "string",
                       "nullable": true
                     },
