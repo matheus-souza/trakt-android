@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.viewmodel.koinViewModel
+import tv.trakt.trakt.common.ui.theme.colors.LightColors
 import tv.trakt.trakt.common.ui.theme.colors.Orange100
 import tv.trakt.trakt.common.ui.theme.colors.Orange300
 import tv.trakt.trakt.common.ui.theme.colors.Orange400
@@ -181,7 +182,7 @@ private fun GreetingCopy(animate: Boolean) {
         Text(
             text = stringResource(R.string.text_seasonal_greeting_halloween),
             style = TraktTheme.typography.paragraphSmall,
-            color = TraktTheme.colors.textPrimary,
+            color = Color.White,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .padding(top = 8.dp)
@@ -208,6 +209,17 @@ private fun Modifier.riseIn(progress: Float): Modifier {
 @Composable
 private fun Preview() {
     TraktTheme {
+        SeasonalSplashContent(
+            season = SeasonalTheme.Halloween,
+            animate = false,
+        )
+    }
+}
+
+@Preview(device = "id:pixel_5")
+@Composable
+private fun PreviewLight() {
+    TraktTheme(colors = LightColors) {
         SeasonalSplashContent(
             season = SeasonalTheme.Halloween,
             animate = false,

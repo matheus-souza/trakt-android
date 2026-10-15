@@ -3,6 +3,7 @@ package tv.trakt.trakt.core.main.ui.seasonal
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -20,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
@@ -37,11 +39,11 @@ private val DurationMillis = 30.seconds.inWholeMilliseconds.toInt()
 internal fun SplashCloseButton(
     modifier: Modifier = Modifier,
     autoDismiss: Boolean = true,
+    color: Color = Color.White,
     onClick: () -> Unit,
 ) {
     val currentOnClick by rememberUpdatedState(onClick)
     val progress = remember { Animatable(0F) }
-    val color = TraktTheme.colors.textPrimary
 
     LaunchedEffect(autoDismiss) {
         if (!autoDismiss) return@LaunchedEffect
@@ -92,7 +94,9 @@ private fun Preview() {
         SplashCloseButton(
             autoDismiss = false,
             onClick = {},
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier
+                .background(Color.Black)
+                .padding(16.dp),
         )
     }
 }

@@ -216,7 +216,7 @@ private fun CustomListContent(
                         end = 16.dp,
                     )
                     .shadow(
-                        elevation = TraktTheme.colors.shadowDynamicDefault,
+                        elevation = TraktTheme.colors.shadowDynamicSmall,
                         shape = RoundedCornerShape(17.dp),
                     )
                     .background(
