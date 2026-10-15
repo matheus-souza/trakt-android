@@ -93,6 +93,7 @@ import tv.trakt.trakt.core.main.navigation.isMainDestination
 import tv.trakt.trakt.core.main.navigation.isStartDestination
 import tv.trakt.trakt.core.main.navigation.navigateToMainDestination
 import tv.trakt.trakt.core.main.ui.checkin.MainCheckInView
+import tv.trakt.trakt.core.main.ui.inputhold.MainInputHoldView
 import tv.trakt.trakt.core.main.ui.menubar.TraktMenuBar
 import tv.trakt.trakt.core.main.ui.rateprompt.MainRatePromptView
 import tv.trakt.trakt.core.main.ui.seasonal.SeasonalSplashView
@@ -458,6 +459,10 @@ private fun MainScreenContent(
                         snackbarHostState = localSnackbar,
                         checkInVisible = state.checkIn?.isActive() == true,
                         ratePromptVisible = state.ratePrompt?.isActive() == true,
+                    )
+
+                    MainInputHoldView(
+                        destination = currentDestination.value?.destination,
                     )
                 }
             }
