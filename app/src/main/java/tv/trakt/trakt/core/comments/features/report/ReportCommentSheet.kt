@@ -5,8 +5,11 @@ package tv.trakt.trakt.core.comments.features.report
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.SheetValue.Expanded
+import androidx.compose.material3.SheetValue.Hidden
+import androidx.compose.material3.rememberBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalResources
@@ -21,15 +24,17 @@ import tv.trakt.trakt.common.model.Comment
 import tv.trakt.trakt.resources.R
 import tv.trakt.trakt.ui.components.TraktBottomSheet
 import tv.trakt.trakt.ui.snackbar.ShortSnackDuration
-import kotlin.random.Random
+import kotlin.random.Random.Default.nextInt
 
 @Composable
 internal fun ReportCommentSheet(
-    state: SheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true,
+    state: SheetState = rememberBottomSheetState(
+        initialValue = Hidden,
+        enabledValues = setOf(Hidden, Expanded),
     ),
     active: Boolean,
     comment: Comment?,
+    skipSnack: Boolean = false,
     onReported: () -> Unit = {},
     onDismiss: () -> Unit,
 ) {
@@ -37,6 +42,7 @@ internal fun ReportCommentSheet(
     val localRes = LocalResources.current
 
     val sheetScope = rememberCoroutineScope()
+    val viewModelKey = remember(comment) { nextInt().toString() }
 
     if (active && comment != null) {
         TraktBottomSheet(
@@ -45,7 +51,7 @@ internal fun ReportCommentSheet(
         ) {
             ReportCommentView(
                 viewModel = koinViewModel(
-                    key = Random.nextInt().toString(),
+                    key = viewModelKey,
                     parameters = {
                         parametersOf(comment)
                     },
@@ -56,6 +62,9 @@ internal fun ReportCommentSheet(
                         sheet = state,
                         onDismiss = onDismiss,
                         action = {
+                            if (skipSnack) {
+                                return@dismissWithAction
+                            }
                             sheetScope.launch {
                                 val job = sheetScope.launch {
                                     val message = localRes.getString(R.string.text_info_report_sent)

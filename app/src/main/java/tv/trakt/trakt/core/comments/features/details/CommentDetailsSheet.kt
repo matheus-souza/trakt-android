@@ -81,6 +81,22 @@ internal fun CommentDetailsSheet(
                         },
                     )
                 },
+                onReportComment = {
+                    sheetScope.dismissWithAction(
+                        sheet = state,
+                        onDismiss = onDismiss,
+                        action = {
+                            sheetScope.launch {
+                                val job = sheetScope.launch {
+                                    val message = localRes.getString(R.string.text_info_report_sent)
+                                    localSnack.showSnackbar(message)
+                                }
+                                delay(ShortSnackDuration)
+                                job.cancel()
+                            }
+                        },
+                    )
+                },
                 onUserClick = onUserClick?.let { userClick ->
                     { user ->
                         sheetScope.dismissWithAction(

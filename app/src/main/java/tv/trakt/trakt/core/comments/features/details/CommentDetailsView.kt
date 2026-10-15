@@ -103,6 +103,7 @@ internal fun CommentDetailsView(
     mentionSource: MentionSource? = null,
     progressTotal: Int? = null,
     onDeleteComment: (commentId: TraktId) -> Unit = {},
+    onReportComment: () -> Unit = {},
     onUserClick: ((User) -> Unit)? = null,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -209,6 +210,8 @@ internal fun CommentDetailsView(
     ReportCommentSheet(
         active = reportCommentSheet != null,
         comment = reportCommentSheet,
+        skipSnack = true,
+        onReported = onReportComment,
         onDismiss = {
             reportCommentSheet = null
         },
