@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import tv.trakt.trakt.common.firebase.analytics.Analytics
 import tv.trakt.trakt.common.helpers.LoadingState
 import tv.trakt.trakt.common.helpers.LoadingState.Done
 import tv.trakt.trakt.common.helpers.LoadingState.Loading
@@ -35,6 +36,7 @@ internal class TodayStoriesViewModel(
     savedStateHandle: SavedStateHandle,
     private val getTodayStoriesUseCase: GetTodayStoriesUseCase,
     private val seenSource: TodaySeenLocalDataSource,
+    analytics: Analytics,
 ) : ViewModel() {
     private val destination = savedStateHandle.toRoute<TodayStoriesDestination>()
     private val initialState = TodayStoriesState(
@@ -50,6 +52,10 @@ internal class TodayStoriesViewModel(
 
     init {
         loadData()
+
+        analytics.logScreenView(
+            screenName = "today_stories",
+        )
     }
 
     // Groups are a snapshot taken on open, so stories do not reshuffle while being watched.
